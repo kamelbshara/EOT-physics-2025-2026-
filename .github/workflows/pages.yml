@@ -20,7 +20,15 @@ jobs:
           SITE: https://kamelbshara.github.io/EOT-physics-2025-2026-
           API: ${{ vars.PHYSICS_API_ORIGIN || 'https://physics-api-production.up.railway.app' }}
         run: |
-          curl -fsSL --retry 3 "$SITE/" -o /tmp/physics-index
+          for attempt in {1..30}; do
+            curl -fsSL "$SITE/?v=$GITHUB_SHA" -o /tmp/physics-index && grep -Fq 'id="school"' /tmp/physics-index && break
+            sleep 5
+          done
+          grep -Fq '<html lang="en" dir="ltr">' /tmp/physics-index
+          grep -Fq 'id="school"' /tmp/physics-index
+          grep -Fq 'id="lawsTab"' /tmp/physics-index
+          curl -fsSL --retry 3 "$SITE/math-input.js" -o /tmp/math-input.js
+          grep -Fq 'mathlive.min.mjs' /tmp/math-input.js
           grep -Fq 'الهيكل 100 مع استاذ احمد غرايبة' /tmp/physics-index
           curl -fsSL --retry 3 "$SITE/api-config.js" | grep -F "$API"
           curl -fsSL --retry 3 "$SITE/vendor/fx991ce/src/index.html" | grep -F 'fx-991CE X'

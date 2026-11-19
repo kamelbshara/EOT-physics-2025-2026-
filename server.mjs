@@ -17,7 +17,7 @@ const assets = new Map([
 ])
 const physics = physicsApi(db)
 const pagesOrigin = process.env.PHYSICS_PAGES_ORIGIN || 'https://kamelbshara.github.io'
-const mime = {'.css':'text/css','.js':'text/javascript','.mjs':'text/javascript','.html':'text/html','.woff':'font/woff','.png':'image/png','.svg':'image/svg+xml'}
+const mime = {'.css':'text/css','.js':'text/javascript','.mjs':'text/javascript','.html':'text/html','.woff2':'font/woff2','.woff':'font/woff','.png':'image/png','.svg':'image/svg+xml'}
 for (const name of readdirSync(new URL('./public/', import.meta.url),{recursive:true})) {
   if (mime[extname(name)]) assets.set('/'+name,[name,mime[extname(name)]])
 }
@@ -70,7 +70,7 @@ export async function handleRequest(request, response) {
       const policy = fromPages ? 'SameSite=None; Secure; Partitioned' : 'SameSite=Lax' + (request.headers['x-forwarded-proto'] === 'https' || request.socket.encrypted ? '; Secure' : '')
       response.setHeader('Set-Cookie', `physics_student=${student}; Path=/; HttpOnly; ${policy}; Max-Age=31536000`)
     }
-    if (/^\/api\/(catalog|profile|progress|card|figure|record|mock)(?:\/|$)/.test(path)) {
+    if (/^\/api\/(catalog|profile|progress|card|figure|record|walkthrough|mock)(?:\/|$)/.test(path)) {
       return await physics(path,request,response,student,reply,jsonBody)
     }
     return reply(404, { error: 'غير متاح' })

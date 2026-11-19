@@ -1,0 +1,836 @@
+{
+  "SRC10-F001": {
+    "en": "How are the reflected rays oriented on the smooth sheet?",
+    "ar": "كيف تتجه الأشعة المنعكسة عن السطح الأملس؟",
+    "terms": [
+      "parallel",
+      "parallel rays",
+      "متوازية",
+      "متواز"
+    ]
+  },
+  "SRC10-V01": {
+    "en": "Which surface keeps the reflected beam ordered?",
+    "ar": "أي السطحين يحافظ على انتظام الحزمة المنعكسة؟",
+    "terms": [
+      "smooth",
+      "smooth surface",
+      "أملس",
+      "السطح الأملس"
+    ]
+  },
+  "SRC10-F014": {
+    "en": "What apparent shift must disappear when the marker reaches the image depth?",
+    "ar": "ما اسم الإزاحة الظاهرية التي تختفي عند تطابق العمق؟",
+    "terms": [
+      "parallax",
+      "اختلاف المنظر",
+      "تزيح",
+      "خطأ اختلاف المنظر"
+    ]
+  },
+  "SRC10-V08": {
+    "en": "In what direction is distance measured from the mirror surface?",
+    "ar": "في أي اتجاه يُقاس البعد عن سطح المرآة؟",
+    "terms": [
+      "perpendicular",
+      "perpendicularly",
+      "normal",
+      "عمودي",
+      "عموديا",
+      "عموديًا"
+    ]
+  },
+  "SRC10-V09": {
+    "en": "Which curved mirror can form a sharp image on a screen?",
+    "ar": "أي مرآة كروية تكوّن صورة واضحة على شاشة؟",
+    "terms": [
+      "concave",
+      "concave mirror",
+      "مقعرة",
+      "مرآة مقعرة"
+    ]
+  },
+  "SRC10-F018": {
+    "en": "Refractive index of the first material",
+    "ar": "معامل انكسار المادة الأولى",
+    "value": 1.62,
+    "unit": ""
+  },
+  "SRC10-V11": {
+    "en": "Speed in the n = 1.45 sample",
+    "ar": "سرعة الضوء في العينة ذات معامل الانكسار 1.45",
+    "value": 207000000.0,
+    "unit": "m/s"
+  },
+  "SRC10-F024": {
+    "en": "What colour is the narrow-band light after the prism?",
+    "ar": "ما لون الضوء ضيق النطاق بعد المنشور؟",
+    "terms": [
+      "green",
+      "أخضر",
+      "اخضر"
+    ]
+  },
+  "SRC10-V14": {
+    "en": "Which deviates more in ordinary glass, red or violet?",
+    "ar": "أي اللونين ينحرف أكثر في الزجاج المعتاد، الأحمر أم البنفسجي؟",
+    "terms": [
+      "violet",
+      "بنفسجي"
+    ]
+  },
+  "SRC10-F025": {
+    "en": "What is the name of the apparent image above a hot road?",
+    "ar": "ماذا تسمّى الصورة الظاهرية فوق طريق ساخن؟",
+    "terms": [
+      "mirage",
+      "سراب"
+    ]
+  },
+  "SRC10-F026": {
+    "en": "As the road cools, does the index gradient strengthen or weaken?",
+    "ar": "عندما يبرد الطريق، هل يزداد تدرج معامل الانكسار أم يضعف؟",
+    "terms": [
+      "weaken",
+      "weakens",
+      "decreases",
+      "يضعف",
+      "يقل"
+    ]
+  },
+  "SRC10-F029": {
+    "en": "Which aberration makes marginal and near-axis rays focus differently?",
+    "ar": "أي زيغ يفصل بؤرة الأشعة الهامشية عن القريبة من المحور؟",
+    "terms": [
+      "spherical",
+      "spherical aberration",
+      "كروي",
+      "زيغ كروي"
+    ]
+  },
+  "SRC10-V17": {
+    "en": "Which aberration does an achromatic lens pair reduce?",
+    "ar": "أي زيغ تخففه العدسة اللالونية المركبة؟",
+    "terms": [
+      "chromatic",
+      "chromatic aberration",
+      "لوني",
+      "زيغ لوني"
+    ]
+  },
+  "SRC10-F031": {
+    "en": "Which vision defect blurs distant objects in this example?",
+    "ar": "أي عيب بصري يسبب ضبابية الأجسام البعيدة هنا؟",
+    "terms": [
+      "myopia",
+      "nearsightedness",
+      "short-sightedness",
+      "قصر النظر"
+    ]
+  },
+  "SRC10-V18": {
+    "en": "A near object's focus would lie behind the retina. Name the condition.",
+    "ar": "تقع بؤرة الجسم القريب خلف الشبكية. ما العيب البصري؟",
+    "terms": [
+      "hyperopia",
+      "farsightedness",
+      "long-sightedness",
+      "طول النظر",
+      "مد البصر"
+    ]
+  },
+  "SRC10-F032": {
+    "en": "Which lens corrects myopia?",
+    "ar": "ما العدسة المصححة لقصر النظر؟",
+    "terms": [
+      "concave",
+      "diverging",
+      "concave lens",
+      "diverging lens",
+      "مقعرة",
+      "مفرقة",
+      "عدسة مقعرة"
+    ]
+  },
+  "SRC10-V19": {
+    "en": "Would a convex lens move a myopic focus forward or backward?",
+    "ar": "هل تنقل العدسة المحدبة بؤرة العين قصيرة النظر للأمام أم للخلف؟",
+    "terms": [
+      "forward",
+      "forwards",
+      "أمام",
+      "للأمام",
+      "إلى الأمام"
+    ]
+  },
+  "SRC10-F035": {
+    "en": "For equal wave amplitudes, is the fringe at 7λ/2 bright or dark?",
+    "ar": "عند فرق مسار 7λ/2 وسعتين متساويتين، هل الهدب مضيء أم مظلم؟",
+    "terms": [
+      "dark",
+      "dark fringe",
+      "مظلم",
+      "معتم"
+    ]
+  },
+  "SRC10-F036": {
+    "en": "With one slit blocked, how many slits contribute light?",
+    "ar": "بعد حجب شق واحد، كم شقًا يساهم في وصول الضوء؟",
+    "value": 1.0,
+    "unit": ""
+  },
+  "SRC10-V21": {
+    "en": "Is the fringe for a 4λ path difference bright or dark?",
+    "ar": "هل الهدب لفرق مسار 4λ مضيء أم مظلم؟",
+    "terms": [
+      "bright",
+      "bright fringe",
+      "مضيء"
+    ]
+  },
+  "SRC10-V22": {
+    "en": "How many reflecting boundaries contribute to thin-film interference here?",
+    "ar": "كم سطحًا عاكسًا يساهم في تداخل الغشاء هنا؟",
+    "value": 2.0,
+    "unit": ""
+  },
+  "SRC10-V23": {
+    "en": "Which film dimension changes along the wedge?",
+    "ar": "أي بُعد للغشاء يتغيّر على امتداد الإسفين؟",
+    "terms": [
+      "thickness",
+      "film thickness",
+      "سمك",
+      "سماكة",
+      "سمك الغشاء"
+    ]
+  },
+  "SRC10-F042": {
+    "en": "What is the spacing pattern of the CD tracks?",
+    "ar": "كيف تتوزع المسافات بين مسارات القرص؟",
+    "terms": [
+      "regular",
+      "uniform",
+      "equal",
+      "equally spaced",
+      "منتظم",
+      "منتظمة",
+      "متساوية"
+    ]
+  },
+  "SRC10-V25": {
+    "en": "Which wave process makes adjacent tracks reinforce particular wavelengths?",
+    "ar": "أي عملية موجية تجعل المسارات المجاورة تعزز أطوالًا موجية محددة؟",
+    "terms": [
+      "interference",
+      "constructive interference",
+      "تداخل",
+      "تداخل بناء"
+    ]
+  },
+  "SRC10-F044": {
+    "en": "Which component separates wavelengths after the slit?",
+    "ar": "أي جزء يفصل الأطوال الموجية بعد الشق؟",
+    "terms": [
+      "grating",
+      "diffraction grating",
+      "محزوز",
+      "محزوز الحيود"
+    ]
+  },
+  "SRC10-V26": {
+    "en": "Which component defines a narrow input beam?",
+    "ar": "أي جزء يحدّد حزمة الدخول الضيقة؟",
+    "terms": [
+      "slit",
+      "entrance slit",
+      "شق",
+      "شق الدخول"
+    ]
+  },
+  "SRC10-V33": {
+    "en": "Which mirror gives the wider field of view?",
+    "ar": "أي مرآة تعطي مجال رؤية أوسع؟",
+    "terms": [
+      "convex",
+      "convex mirror",
+      "محدبة",
+      "مرآة محدبة"
+    ]
+  },
+  "SRC10-F057": {
+    "en": "Refractive index",
+    "ar": "معامل الانكسار",
+    "value": 1.51,
+    "unit": ""
+  },
+  "SRC10-V35": {
+    "en": "Refractive index of the block",
+    "ar": "معامل انكسار اللوح",
+    "value": 1.53,
+    "unit": ""
+  },
+  "SRC10-V36": {
+    "en": "Refractive index from the critical angle",
+    "ar": "معامل الانكسار المحسوب من الزاوية الحرجة",
+    "value": 1.7,
+    "unit": ""
+  },
+  "SRC10-F063": {
+    "en": "Which lies farther from the centre for the same nonzero order, red or blue?",
+    "ar": "أي اللونين أبعد عن المركز للرتبة غير الصفرية نفسها، الأحمر أم الأزرق؟",
+    "terms": [
+      "red",
+      "أحمر",
+      "احمر"
+    ]
+  },
+  "SRC10-F064": {
+    "en": "Ratio of red to blue fringe positions",
+    "ar": "نسبة بُعد الهدب الأحمر إلى بُعد الهدب الأزرق",
+    "value": 1.444444,
+    "unit": ""
+  },
+  "SRC10-V40": {
+    "en": "Which is farther out at the same nonzero order, red or violet?",
+    "ar": "أي اللونين أبعد عن المركز للرتبة غير الصفرية نفسها، الأحمر أم البنفسجي؟",
+    "terms": [
+      "red",
+      "أحمر",
+      "احمر"
+    ]
+  },
+  "SRC10-F065": {
+    "en": "For a bright fringe, what is the path difference divided by λ called?",
+    "ar": "للهدب المضيء، ماذا تسمّى نسبة فرق المسار إلى λ؟",
+    "terms": [
+      "order",
+      "fringe order",
+      "m",
+      "رتبة",
+      "رتبة الهدب"
+    ]
+  },
+  "SRC10-F066": {
+    "en": "New fringe spacing divided by original spacing",
+    "ar": "تباعد الأهداب الجديد مقسومًا على الأصلي",
+    "value": 0.25,
+    "unit": ""
+  },
+  "SRC10-V41": {
+    "en": "New first-fringe position divided by its original position",
+    "ar": "موضع الهدب الأول الجديد مقسومًا على موضعه الأصلي",
+    "value": 1.5,
+    "unit": ""
+  },
+  "SRC10-F069": {
+    "en": "Which colour has first minima farther from the centre, red or blue?",
+    "ar": "أي لون يقع حدّه الأدنى الأول أبعد عن المركز، الأحمر أم الأزرق؟",
+    "terms": [
+      "red",
+      "أحمر",
+      "احمر"
+    ]
+  },
+  "SRC10-F070": {
+    "en": "Does the central bright band widen or narrow?",
+    "ar": "هل يتسع الهدب المركزي المضيء أم يضيق؟",
+    "terms": [
+      "widen",
+      "widens",
+      "wider",
+      "يتسع",
+      "يزداد عرضه"
+    ]
+  },
+  "SRC10-V43": {
+    "en": "Does reducing the green slit width widen or narrow its central band?",
+    "ar": "هل تقليل عرض الشق للضوء الأخضر يوسّع الهدب المركزي أم يضيّقه؟",
+    "terms": [
+      "widen",
+      "widens",
+      "wider",
+      "يوسع",
+      "يتسع",
+      "يزداد عرضه"
+    ]
+  },
+  "SRC10-F071": {
+    "en": "At the first minimum, what fraction of λ separates the paired paths?",
+    "ar": "عند الحد الأدنى الأول، ما فرق مسار النقطتين المتناظرتين بوصفه كسرًا من λ؟",
+    "value": 0.5,
+    "unit": ""
+  },
+  "SRC10-V44": {
+    "en": "Full central width divided by the centre-to-first-minimum distance",
+    "ar": "العرض المركزي الكامل مقسومًا على المسافة من المركز إلى الحد الأدنى الأول",
+    "value": 2.0,
+    "unit": ""
+  },
+  "SRC10-V46": {
+    "en": "Are grating grooves regularly or randomly spaced?",
+    "ar": "هل تتوزع خطوط المحزوز بانتظام أم عشوائيًا؟",
+    "terms": [
+      "regularly",
+      "regular",
+      "uniformly",
+      "بانتظام",
+      "منتظمة",
+      "بشكل منتظم"
+    ]
+  },
+  "SRC10-F075": {
+    "en": "What is the order at θ = 0?",
+    "ar": "ما الرتبة عند θ = 0؟",
+    "value": 0.0,
+    "unit": ""
+  },
+  "SRC10-V47": {
+    "en": "At which order do both wavelengths emerge at zero angle?",
+    "ar": "عند أي رتبة يخرج الطولان الموجيان بزاوية صفر؟",
+    "value": 0.0,
+    "unit": ""
+  },
+  "G9A-EXT-001": {
+    "en": "Should contradictory trial results be discarded?",
+    "ar": "هل ينبغي حذف نتائج المحاولات التي تخالف الفرضية؟",
+    "terms": [
+      "no",
+      "لا"
+    ]
+  },
+  "G9A-EXT-002": {
+    "en": "Must every investigation follow a rigid sequence exactly once?",
+    "ar": "هل يجب تنفيذ مراحل كل استقصاء بترتيب جامد مرة واحدة؟",
+    "terms": [
+      "no",
+      "لا"
+    ]
+  },
+  "G9A-EXT-003": {
+    "en": "What is expert evaluation of a scientific report called?",
+    "ar": "ماذا تسمّى مراجعة المختصين للتقرير العلمي؟",
+    "terms": [
+      "peer review",
+      "مراجعة الأقران",
+      "تحكيم علمي"
+    ]
+  },
+  "G9A-EXT-004": {
+    "en": "Should a model be revised when new evidence reveals its limits?",
+    "ar": "هل يُعدّل النموذج عندما تكشف الأدلة الجديدة حدوده؟",
+    "terms": [
+      "yes",
+      "نعم"
+    ]
+  },
+  "G9A-EXT-005": {
+    "en": "Should simulator predictions be validated with evidence?",
+    "ar": "هل ينبغي التحقق من تنبؤات المحاكي بالأدلة؟",
+    "terms": [
+      "yes",
+      "نعم"
+    ]
+  },
+  "G9A-EXT-006": {
+    "en": "Which explains the pattern, a law or a theory?",
+    "ar": "أيّهما يفسّر النمط، القانون أم النظرية؟",
+    "terms": [
+      "theory",
+      "نظرية"
+    ]
+  },
+  "G9A-EXT-007": {
+    "en": "Is a single divergent measurement enough to reject the relation?",
+    "ar": "هل يكفي قياس واحد مخالف لرفض العلاقة؟",
+    "terms": [
+      "no",
+      "لا"
+    ]
+  },
+  "G9A-EXT-008": {
+    "en": "Converted mass",
+    "ar": "الكتلة بعد التحويل",
+    "value": 1340.0,
+    "unit": "g"
+  },
+  "G9A-EXT-009": {
+    "en": "Speed after conversion",
+    "ar": "السرعة بعد التحويل",
+    "value": 55.6,
+    "unit": "m/s"
+  },
+  "G9A-EXT-010": {
+    "en": "What is the SI unit of average speed?",
+    "ar": "ما وحدة السرعة المتوسطة في النظام الدولي؟",
+    "terms": [
+      "m/s",
+      "m s⁻¹",
+      "metres per second",
+      "meters per second",
+      "متر لكل ثانية",
+      "م/ث"
+    ]
+  },
+  "G9A-EXT-012": {
+    "en": "Reported difference",
+    "ar": "الفرق بعد التقريب",
+    "value": 4.33,
+    "unit": "m"
+  },
+  "G9A-EXT-013": {
+    "en": "Reported density",
+    "ar": "الكثافة بعد التقريب",
+    "value": 1.22,
+    "unit": "g/mL"
+  },
+  "G9A-EXT-014": {
+    "en": "Which interval has the smallest stated uncertainty, 1, 2 or 3?",
+    "ar": "أي مجال له أصغر عدم يقين، 1 أم 2 أم 3؟",
+    "value": 3.0,
+    "unit": ""
+  },
+  "G9A-EXT-016": {
+    "en": "Name the error caused by viewing the scale at an angle.",
+    "ar": "سمّ خطأ قراءة التدريج من زاوية مائلة.",
+    "terms": [
+      "parallax",
+      "parallax error",
+      "اختلاف المنظر",
+      "خطأ اختلاف المنظر",
+      "تزيح"
+    ]
+  },
+  "G9A-EXT-020": {
+    "en": "Does a single point specify the orientation of a rigid body?",
+    "ar": "هل تحدد نقطة واحدة اتجاه جسم صلب؟",
+    "terms": [
+      "no",
+      "لا"
+    ]
+  },
+  "G9A-EXT-037": {
+    "en": "Ratio of the second uncertainty to the first",
+    "ar": "نسبة عدم اليقين الثاني إلى الأول",
+    "value": 50.0,
+    "unit": ""
+  },
+  "G11A-EXT-002": {
+    "en": "Angular displacement in the stated 24 h model after 6 h",
+    "ar": "الإزاحة الزاوية خلال 6 ساعات في نموذج اليوم ذي 24 ساعة",
+    "value": 1.570796327,
+    "unit": "rad"
+  },
+  "G11A-EXT-015": {
+    "en": "Which centre of mass resists tipping better here, higher or lower?",
+    "ar": "أي موضعي مركز الكتلة يزيد مقاومة الانقلاب هنا، الأعلى أم الأدنى؟",
+    "terms": [
+      "lower",
+      "low",
+      "الأدنى",
+      "المنخفض",
+      "أخفض"
+    ]
+  },
+  "G11A-EXT-018": {
+    "en": "Is a new sideways interaction needed in the inertial frame?",
+    "ar": "هل يلزم تفاعل جانبي جديد في الإطار القصوري؟",
+    "terms": [
+      "no",
+      "لا"
+    ]
+  },
+  "G12A-EXT-012": {
+    "en": "Photon energy at 400 nm",
+    "ar": "طاقة الفوتون عند 400 nm",
+    "value": 3.1,
+    "unit": "eV"
+  },
+  "G12A-EXT-015": {
+    "en": "Photoelectron speed",
+    "ar": "سرعة الإلكترون الضوئي",
+    "value": 900000.0,
+    "unit": "m/s"
+  },
+  "G12A-EXT-016": {
+    "en": "Stopping potential",
+    "ar": "جهد الإيقاف",
+    "value": 4.68,
+    "unit": "V"
+  },
+  "G12A-EXT-020": {
+    "en": "Accelerating voltage",
+    "ar": "جهد التسريع",
+    "value": 96.4,
+    "unit": "V"
+  },
+  "G12A-EXT-021": {
+    "en": "Matter wavelength",
+    "ar": "طول موجة المادة",
+    "value": 1.1e-35,
+    "unit": "m"
+  },
+  "G12A-EXT-022": {
+    "en": "If position uncertainty shrinks, does the minimum momentum uncertainty increase or decrease?",
+    "ar": "إذا قل عدم يقين الموضع، هل يزيد الحد الأدنى لعدم يقين الزخم أم ينقص؟",
+    "terms": [
+      "increase",
+      "increases",
+      "يزيد",
+      "يزداد"
+    ]
+  },
+  "G12A-EXT-024": {
+    "en": "Name the spectrum showing dark lines.",
+    "ar": "سمّ الطيف الذي تظهر فيه خطوط مظلمة.",
+    "terms": [
+      "absorption",
+      "absorption spectrum",
+      "امتصاص",
+      "طيف امتصاص"
+    ]
+  },
+  "G12A-EXT-027": {
+    "en": "Radius for n = 4",
+    "ar": "نصف قطر المدار عند n = 4",
+    "value": 0.848,
+    "unit": "nm"
+  },
+  "G12A-EXT-029": {
+    "en": "Does spontaneous emission require a stimulating photon?",
+    "ar": "هل يتطلب الانبعاث التلقائي فوتونًا محفّزًا؟",
+    "terms": [
+      "no",
+      "لا"
+    ]
+  },
+  "G12A-EXT-030": {
+    "en": "What does a quantum cloud represent?",
+    "ar": "ماذا تمثّل السحابة الكمية؟",
+    "terms": [
+      "probability",
+      "position probability",
+      "probability density",
+      "احتمال وجود الإلكترون",
+      "كثافة الاحتمال",
+      "احتمال"
+    ]
+  },
+  "G12A-EXT-033": {
+    "en": "Energy converted to thermal energy",
+    "ar": "الطاقة المتحوّلة إلى طاقة حرارية",
+    "value": 720.0,
+    "unit": "J"
+  },
+  "G12A-EXT-034": {
+    "en": "First bounce below the threshold height",
+    "ar": "رقم أول ارتداد تحت الارتفاع المحدّد",
+    "value": 4.0,
+    "unit": ""
+  },
+  "G12A-EXT-041": {
+    "en": "Name the series ending at n = 1.",
+    "ar": "سمّ السلسلة المنتهية عند n = 1.",
+    "terms": [
+      "Lyman",
+      "ليمان"
+    ]
+  },
+  "G9A-EXT-043": {
+    "en": "What do we call an interpretation of measured evidence?",
+    "ar": "ماذا يسمّى تفسير الأدلة المستند إلى القياسات؟",
+    "terms": [
+      "inference",
+      "استدلال",
+      "استنتاج"
+    ]
+  },
+  "G9A-EXT-045": {
+    "en": "May air resistance be ignored for the sheet in the stated situation?",
+    "ar": "هل يجوز إهمال مقاومة الهواء للورقة في الحالة المذكورة؟",
+    "terms": [
+      "no",
+      "لا"
+    ]
+  },
+  "G9A-EXT-046": {
+    "en": "What name is given to the supported explanation?",
+    "ar": "ماذا نسمّي التفسير المدعوم بالأدلة؟",
+    "terms": [
+      "theory",
+      "scientific theory",
+      "نظرية",
+      "نظرية علمية"
+    ]
+  },
+  "G9A-EXT-047": {
+    "en": "Does finding a limit to a law invalidate all its earlier applications?",
+    "ar": "هل اكتشاف حدود القانون يبطل كل تطبيقاته السابقة؟",
+    "terms": [
+      "no",
+      "لا"
+    ]
+  },
+  "G9A-EXT-049": {
+    "en": "Reported sum",
+    "ar": "المجموع بعد التقريب",
+    "value": 13.7,
+    "unit": "m"
+  },
+  "G9A-EXT-050": {
+    "en": "Range of the readings",
+    "ar": "مدى القراءات",
+    "value": 2.0,
+    "unit": "cm"
+  },
+  "G9A-EXT-056": {
+    "en": "Signed velocity",
+    "ar": "السرعة المتجهة بإشارتها",
+    "value": -2.0,
+    "unit": "m/s"
+  },
+  "G9A-EXT-057": {
+    "en": "Separation between A and B",
+    "ar": "المسافة الفاصلة بين A وB",
+    "value": 10.0,
+    "unit": "m"
+  },
+  "G9A-EXT-068": {
+    "en": "Time of flight divided by the Earth value",
+    "ar": "زمن التحليق مقسومًا على قيمته على الأرض",
+    "value": 3.0,
+    "unit": ""
+  },
+  "G9A-EXT-071": {
+    "en": "Absolute uncertainty in metres",
+    "ar": "عدم اليقين المطلق بوحدة المتر",
+    "value": 0.0005,
+    "unit": "m"
+  },
+  "G11A-EXT-043": {
+    "en": "New angular speed divided by original angular speed",
+    "ar": "السرعة الزاوية الجديدة مقسومة على الأصلية",
+    "value": 0.8,
+    "unit": ""
+  },
+  "G11A-EXT-044": {
+    "en": "Are the tangential velocity vectors parallel or opposite?",
+    "ar": "هل متجها السرعة المماسية في الاتجاه نفسه أم متعاكسان؟",
+    "terms": [
+      "opposite",
+      "opposite directions",
+      "متعاكسان",
+      "متعاكسين",
+      "متعاكسة"
+    ]
+  },
+  "G11A-EXT-048": {
+    "en": "Is the moving cart in static equilibrium in this frame?",
+    "ar": "هل العربة المتحركة في اتزان سكوني في هذا الإطار؟",
+    "terms": [
+      "no",
+      "لا"
+    ]
+  },
+  "G11A-EXT-049": {
+    "en": "In the Northern Hemisphere, which side of the motion is the apparent deflection toward?",
+    "ar": "في نصف الكرة الشمالي، إلى أي جانب من الحركة يكون الانحراف الظاهري؟",
+    "terms": [
+      "right",
+      "rightward",
+      "rightwards",
+      "يمين",
+      "اليمين"
+    ]
+  },
+  "G11A-EXT-052": {
+    "en": "Does the bat still exert a contact force after separation?",
+    "ar": "هل يبقى للمضرب تأثير بقوة تماس بعد الانفصال؟",
+    "terms": [
+      "no",
+      "لا"
+    ]
+  },
+  "G12A-EXT-044": {
+    "en": "Which energy store corresponds to a deformed spring?",
+    "ar": "ما الطاقة المختزنة في نابض مشوّه؟",
+    "terms": [
+      "elastic potential energy",
+      "elastic energy",
+      "طاقة وضع مرونية",
+      "طاقة وضع مرنة",
+      "طاقة مرونية"
+    ]
+  },
+  "G12A-EXT-048": {
+    "en": "Minimum momentum uncertainty",
+    "ar": "أصغر عدم يقين للزخم",
+    "value": 5.275e-25,
+    "unit": "kg·m/s"
+  },
+  "G12A-EXT-050": {
+    "en": "Is a single matching spectral line sufficient for a secure identification?",
+    "ar": "هل يكفي تطابق خط طيفي واحد للتعرف الموثوق إلى العنصر؟",
+    "terms": [
+      "no",
+      "لا"
+    ]
+  },
+  "G12A-EXT-052": {
+    "en": "Can a significant external impulse change total momentum?",
+    "ar": "هل يستطيع دفع خارجي غير مهمل تغيير الزخم الكلي؟",
+    "terms": [
+      "yes",
+      "نعم"
+    ]
+  },
+  "G9A-EXT-081": {
+    "en": "Time at 12.0 m",
+    "ar": "الزمن عند الموضع 12.0 m",
+    "value": 2.4,
+    "unit": "s"
+  },
+  "G9A-EXT-092": {
+    "en": "Separation between the objects",
+    "ar": "البعد بين الجسمين",
+    "value": 30.0,
+    "unit": "m"
+  },
+  "G11A-EXT-062": {
+    "en": "I about axis B divided by md²",
+    "ar": "عزم القصور حول B مقسومًا على md²",
+    "value": 14.0,
+    "unit": ""
+  },
+  "G11A-EXT-064": {
+    "en": "Force from support B when A is directly under the centre of mass",
+    "ar": "قوة الدعامة B عندما تكون A تحت مركز الكتلة مباشرة",
+    "value": 0.0,
+    "unit": "N"
+  },
+  "G11A-EXT-065": {
+    "en": "Relative to the ground, which way does the object advance?",
+    "ar": "بالنسبة إلى الأرض، في أي اتجاه يتقدم الجسم؟",
+    "terms": [
+      "east",
+      "eastward",
+      "eastwards",
+      "شرق",
+      "شرقًا",
+      "إلى الشرق"
+    ]
+  },
+  "G11A-EXT-067": {
+    "en": "For the same force, which mass has the greater acceleration?",
+    "ar": "للقوة نفسها، أي الكتلتين لها التسارع الأكبر؟",
+    "terms": [
+      "smaller",
+      "smaller mass",
+      "lighter",
+      "الأصغر",
+      "الكتلة الأصغر",
+      "الأخف"
+    ]
+  }
+}

@@ -1,3 +1,7 @@
+import { writtenEditor, hasResponse } from './math-input.js'
+import { laws, relevantLaws } from './laws.js'
+import { lang, t, changeLanguage, applyLanguage, errorText } from './language.js'
+import { englishHint, englishGuides } from './english-support.js'
 import { apiOrigin } from './api-config.js'
 import { installContentShield } from './content-shield.js'
 import { setupFloatingCalculator } from './floating-calculator.js'
@@ -7,16 +11,17 @@ import { support, guides } from './guides.js'
 const $=id=>document.getElementById(id)
 function element(tag,text){const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node}
 function button(text,fn){const b=element('button',text);b.onclick=guard(fn);return b}
-function guard(fn){return async (...args)=>{try{await fn(...args)}catch(e){$('notice').textContent=e.message}}}
+function guard(fn){return async (...args)=>{try{await fn(...args)}catch(e){($('login').open?$('loginError'):$('notice')).textContent=errorText(e.message)}}}
 async function api(path,body){
  const res=await fetch(apiOrigin+'/api/'+path,{credentials:'include',...(body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})})
- if(!res.ok)throw Error((await res.json()).error||'تعذّر الاتصال')
+ if(!res.ok)throw Error((await res.json()).error||t('Connection failed.','تعذّر الاتصال'))
  return res.json()
 }
+let activeTab='practice'
 let cards=[],profile,grade=9,current,items=[],index=0,mock=null,inMock=false,cache={},key,queue=Promise.resolve(),replies={},opened=0
 const style=element('style',watermarkCss);document.head.append(style)
 setupFloatingCalculator(document, './')
-function persist(){try{localStorage.setItem(key,JSON.stringify(cache))}catch{$('notice').textContent='تعذّر الحفظ على الجهاز. تحقق من مساحة التخزين.'}}
+function persist(){try{localStorage.setItem(key,JSON.stringify(cache))}catch{$('notice').textContent=t('Device storage is unavailable. Check your storage settings.','تعذّر الحفظ على الجهاز. تحقق من مساحة التخزين.')}}
 async function sync(){
  for(const [id,draft] of Object.entries(cache)){
   if(!draft.pending)continue
@@ -39,43 +44,66 @@ function schedule(){queue=queue.catch(()=>{}).then(sync);return queue}
 function remember(id,response,checked=false){cache[id]={response,checked,pending:true};persist();delete replies[id]}
 async function init(){
  const catalog=await api('catalog');cards=catalog.cards;profile=catalog.profile
- if(!profile){$('login').showModal();return}
+ if(!profile?.school){$('name').value=profile?.name||$('name').value; if(!$('login').open)$('login').showModal();return}
  sessionStorage.setItem('physics-profile',JSON.stringify(profile))
  key='physics-practice-'+profile.startedAt
  try{cache=JSON.parse(localStorage.getItem(key)||'{}')}catch{cache={}}
  for(const r of await api('progress'))if(!cache[r.question]?.pending)cache[r.question]={response:r.response,checked:Boolean(r.checked),lo:r.lo}
  persist();await schedule();mock=await api('mock');await syncMock();mock=await api('mock');dashboard()
 }
-$('loginForm').onsubmit=guard(async e=>{e.preventDefault();await api('profile',{name:$('name').value});$('login').close();await init()})
+$('loginForm').onsubmit=guard(async e=>{e.preventDefault();await api('profile',{name:$('name').value,school:$('school').value});$('login').close();await init()})
 $('login').addEventListener('cancel',e=>e.preventDefault())
+function showTab(tab){
+ activeTab=tab
+ $('lawsPage').hidden=tab!=='laws'
+ $('dashboard').hidden=tab==='laws'||Boolean(items.length)
+ $('lesson').hidden=tab==='laws'||!items.length
+ $('practiceTab').setAttribute('aria-selected',tab==='practice')
+ $('lawsTab').setAttribute('aria-selected',tab==='laws')
+ if(tab==='laws')renderLaws()
+ else if(items.length)lesson()
+ else dashboard()
+}
+function renderLaws(){
+ const selected=Number($('lawGrade').value)
+ $('lawCards').replaceChildren(...laws.filter(row=>row[0]===selected).map(row=>{
+  const article=element('article');article.className='law-card'
+  const formula=element('p',row[4]);formula.className='formula'
+  article.append(element('h3',t(row[2],row[3])),formula,element('p',t(row[5],row[6])))
+  return article
+ }))
+}
+$('practiceTab').onclick=()=>showTab('practice')
+$('lawsTab').onclick=()=>{$('lawGrade').value=String(inMock?mock.grade:grade);showTab('laws')}
+$('lawGrade').onchange=renderLaws
 function dashboard(){
- opened++;inMock=false;$('lesson').hidden=true;$('dashboard').hidden=false;$('notice').textContent=''
- $('gradeTabs').replaceChildren(...[9,10,11,12].map(n=>{const b=button('الصف '+n,()=>{grade=n;dashboard()});b.setAttribute('aria-pressed',n===grade);return b}))
- const group=cards.filter(c=>c.grade===grade);$('gradeTitle').textContent='الصف '+grade+' المتقدم · '+group.length+' مؤشراً'
+ items=[];$('studyTabs').hidden=false;opened++;inMock=false;$('lesson').hidden=true;$('dashboard').hidden=false;$('notice').textContent=''
+ $('gradeTabs').replaceChildren(...[9,10,11,12].map(n=>{const b=button(t('Grade ','الصف ')+n,()=>{grade=n;dashboard()});b.setAttribute('aria-pressed',n===grade);return b}))
+ const group=cards.filter(c=>c.grade===grade);$('gradeTitle').textContent=t('Grade '+grade+' Advanced · '+group.length+' outcomes','الصف '+grade+' المتقدم · '+group.length+' مؤشراً')
  $('cards').replaceChildren(...group.map(c=>{
    const b=button('',async()=>{const mark=++opened;const list=await api('card/'+c.id);if(mark!==opened)return;current=c;items=list;inMock=false;index=items.findIndex(q=>!cache[q.id]?.checked);index=Math.max(0,index);lesson()})
    b.className='kpi';const done=Object.values(cache).filter(v=>v.lo===c.id&&v.checked).length
-   const bar=element('progress');bar.max=c.total;bar.value=done;bar.setAttribute('aria-label','تقدم التدريب')
-   b.append(element('small','مؤشر '+c.slot+' · '+c.total+' أسئلة'),element('h3',c.ar),bar,element('small','تمت مراجعة '+done+' من '+c.total));return b
+   const bar=element('progress');bar.max=c.total;bar.value=done;bar.setAttribute('aria-label',t('Practice progress','تقدم التدريب'))
+   b.append(element('small',t('Outcome '+c.slot+' · '+c.total+' questions','مؤشر '+c.slot+' · '+c.total+' أسئلة')),element('h3',c[lang()]),bar,element('small',t(done+' of '+c.total+' reviewed','تمت مراجعة '+done+' من '+c.total)));return b
  }))
- $('resumeMock').hidden=!mock;$('resumeMock').textContent=mock?.done?'مراجعة آخر اختبار':'متابعة اختبار الصف '+mock?.grade
+ $('resumeMock').hidden=!mock;$('resumeMock').textContent=mock?.done?t('Review latest mock','مراجعة آخر اختبار'):t('Resume Grade ','متابعة اختبار الصف ')+mock?.grade
 }
 function openMock(){inMock=true;items=mock.questions;current=null;index=0;lesson()}
 $('resumeMock').onclick=()=>openMock()
 $('mockStart').onclick=guard(async()=>{if(!mock||mock.done)mock=await api('mock/new',{grade});openMock()})
 $('back').onclick=()=>dashboard()
 function figures(q,role,ids){
- return ids.map((id,i)=>{const img=element('img');img.crossOrigin='use-credentials';img.src=apiOrigin+'/api/figure/'+q.id+'/'+role+'/'+i;img.alt=(role==='question'?'رسم السؤال ':'رسم الحل ')+(i+1);return img})
+ return ids.map((id,i)=>{const img=element('img');img.crossOrigin='use-credentials';img.src=apiOrigin+'/api/figure/'+q.id+'/'+role+'/'+i;img.alt=(role==='question'?t('Question figure ','رسم السؤال '):t('Solution figure ','رسم الحل '))+(i+1);return img})
 }
 function lesson(){
  const q=items[index],draft=cache[q.id],answer=inMock?mock.answers[q.id]:draft?.response
  $('notice').textContent='';$('dashboard').hidden=true;$('lesson').hidden=false
- $('unit').textContent=inMock?'اختبار تجريبي · الصف '+mock.grade:current.id+' · الصف '+current.grade
+ $('unit').textContent=inMock?t('Mock exam · Grade ','اختبار تجريبي · الصف ')+mock.grade:current.id+t(' · Grade ',' · الصف ')+current.grade
  const auto=inMock&&mock.done?items.filter(i=>i.kind==='MCQ'):[]
- $('title').textContent=inMock?(mock.done?'مراجعة الاختبار · '+auto.filter(i=>mock.answers[i.id]===i.review.correct).length+'/'+auto.length+' اختيار من متعدد':'اختبار الهيكل'):current.ar
+ $('title').textContent=inMock?(mock.done?t('Mock review · ','مراجعة الاختبار · ')+auto.filter(i=>mock.answers[i.id]===i.review.correct).length+'/'+auto.length+t(' multiple choice',' اختيار من متعدد'):t('Mock exam','اختبار الهيكل')):current[lang()]
  $('nav').replaceChildren(...items.map((v,n)=>{const b=button(n+1,()=>{index=n;lesson()});b.setAttribute('aria-pressed',n===index);b.classList.toggle('chip-done',inMock?!!mock.answers[v.id]:!!cache[v.id]?.checked);return b}))
- $('meta').textContent=(q.kind==='MCQ'?'اختيار من متعدد':'إجابة مكتوبة')+' · '+(index+1)+' / '+items.length
- $('wm').innerHTML=questionWatermark();$('stem').textContent=q.ar;$('english').textContent=q.en;$('images').replaceChildren(...figures(q,'question',q.images))
+ $('meta').textContent=(q.kind==='MCQ'?t('Multiple choice','اختيار من متعدد'):t('Written response','إجابة مكتوبة'))+' · '+(index+1)+' / '+items.length
+ $('wm').innerHTML=questionWatermark();$('stem').textContent=q[lang()];$('altLang').textContent=t('العربية','English');$('english').lang=t('ar','en');$('english').dir=t('rtl','ltr');$('english').textContent=q[t('ar','en')];$('images').replaceChildren(...figures(q,'question',q.images))
  const inputs=$('inputs');inputs.replaceChildren()
  const readonly=inMock&&mock.done
  function edit(value){
@@ -89,50 +117,94 @@ function lesson(){
    mock.answers[q.id]=value
    queue=queue.catch(()=>{}).then(syncMock)
   }else{remember(q.id,value);cache[q.id].lo=q.lo;persist();schedule()}
-  queue.catch(()=>{$('notice').textContent=inMock?'تعذّر حفظ إجابة الاختبار. أعد المحاولة.':'حُفظ على الجهاز. ستتم المزامنة عند عودة الاتصال.'})
+  queue.catch(()=>{$('notice').textContent=inMock?t('Your mock answer could not be saved. Try again.','تعذّر حفظ إجابة الاختبار. أعد المحاولة.'):t('Saved on this device. Progress will sync when you reconnect.','حُفظ على الجهاز. ستتم المزامنة عند عودة الاتصال.')})
  }
  if(q.kind==='MCQ')for(const opt of q.options){
   const label=element('label'),radio=element('input');radio.type='radio';radio.name='answer';radio.value=opt.key;radio.checked=answer===opt.key;radio.disabled=readonly;radio.onchange=()=>edit(opt.key)
-  const desc=element('span',opt.key+' · '+opt.ar);desc.title=opt.en;label.append(radio,desc);inputs.append(label)
- }else{const a=element('textarea');a.value=answer||'';a.maxLength=2500;a.placeholder='اكتب خطوات الحل والوحدة أو فسّر إجابتك…';a.setAttribute('aria-label','إجابتك');a.disabled=readonly;a.oninput=()=>edit(a.value);inputs.append(a)}
- $('hintText').hidden=true;$('result').hidden=true;$('manual').hidden=inMock&&!mock.done;$('hint').hidden=inMock&&!mock.done
- $('check').hidden=readonly;$('check').textContent=inMock?'إنهاء الاختبار':q.kind==='FRQ'?'قارن بالحل النموذجي':'تحقق من الإجابة'
+  const desc=element('span',opt.key+' · '+opt[lang()]);desc.title=opt[t('ar','en')];label.append(radio,desc);inputs.append(label)
+ }else writtenEditor(inputs,q,answer,readonly,edit)
+ $('hintText').hidden=true;$('result').hidden=true;$('walkthrough').hidden=inMock;$('manual').hidden=inMock&&!mock.done;$('hint').hidden=inMock&&!mock.done
+ $('check').hidden=readonly;$('check').textContent=inMock?t('Finish mock','إنهاء الاختبار'):q.kind==='FRQ'?t('Check response','افحص الإجابة'):t('Check answer','تحقق من الإجابة')
  $('next').disabled=index===items.length-1
  if(readonly)showReview(q,q.review,answer)
  else if(!inMock&&draft?.checked){if(replies[q.id])showReview(q,replies[q.id],answer);else void guard(async()=>{const r=await api('record',{id:q.id,response:answer,check:true});if(items[index]===q&&!inMock&&cache[q.id]===draft){replies[q.id]=r;showReview(q,r,answer)}})()}
  tick()
 }
-function showReview(q,r,answer){
- const out=$('result');out.hidden=false;const title=q.kind==='FRQ'?'مراجعة ذاتية · قارن خطواتك بالحل':answer===r.correct?'إجابة صحيحة':answer?'راجع اختيارك':'لم تُجب'
- out.replaceChildren(element('h3',title))
- if(q.kind==='MCQ'&&answer!==r.correct){
-  const selected=q.options.find(o=>o.key===answer)
-  if(selected)out.append(element('p','اخترت: '+selected.ar))
-  out.append(element('p','الإجابة الصحيحة: '+q.options.find(o=>o.key===r.correct).ar))
-  if(r.advice)out.append(element('p',r.advice))
+function showReview(q,r,answer,studyOnly=false){
+ const out=$('result');out.hidden=false
+ const correct=q.kind==='MCQ' && answer===r.correct
+ const states=r.coach?.parts||[]
+ const title=q.kind==='MCQ' ? (correct?t('Correct answer','إجابة صحيحة'):t('Review your choice','راجع اختيارك')) :
+  r.coach?.exact?t('Your answer matches the model','تطابق إجابتك الحل النموذجي'):
+  states.length&&states.every(code=>code==='correct')?t('All short-answer checks passed','كل الإجابات القصيرة صحيحة'):t('Review your response','مراجعة إجابتك')
+ out.replaceChildren(element('h3',studyOnly?t('Solution walkthrough','شرح الحل خطوة بخطوة'):title))
+ const step=(heading,body)=>{
+  const block=element('section');block.className='coach-step'
+  block.append(element('h4',heading),element('p',body));out.append(block)
  }
- out.append(element('p',r.ar),...figures(q,'solution',r.images))
- const details=element('details');details.append(element('summary','Worked solution'),element('p',r.en));details.dir='ltr';out.append(details)
+ const messages={
+  correct:t('Correct.','صحيح.'), empty:t('Still blank.','الحقل فارغ.'),
+  expression:t('Use a numerical expression and select its unit separately.','اكتب تعبيرًا عدديًا وحدّد الوحدة من القائمة.'),
+  unit:t('Check the unit.','راجع الوحدة.'),sign:t('The magnitude matches. Check the direction and sign.','المقدار صحيح. راجع الاتجاه والإشارة.'),
+  scale:t('Check the power of ten and unit conversion.','راجع أسّ العشرة وتحويل الوحدة.'),
+  retry:t('Recheck the relation and substitution.','راجع العلاقة والتعويض.'),
+  term:t('Compare your term with the definition. Other wording can be reviewed against the model.','قارن مصطلحك بالتعريف. راجع الصياغات البديلة مع الحل النموذجي.')
+ }
+ if(!studyOnly && states.length)states.forEach((code,i)=>step(q.fields[i]?.[lang()]||String(i+1),messages[code]))
+ if(q.kind==='MCQ' && !correct){
+  const selected=q.options.find(o=>o.key===answer)
+  if(selected)step(t('Your choice','اختيارك'),selected[lang()])
+ }
+ if(!studyOnly && q.kind==='FRQ' && !r.coach?.exact && !states.length)out.append(element('p',t('Compare your answer with the reasoning below. Written explanations and diagrams are reviewed against the worked solution.','قارن جوابك بالتسلسل أدناه. تُراجع التفسيرات والرسومات بالمقارنة مع الحل النموذجي.')))
+ step(t('1 · Identify the idea','١ · حدّد الفكرة'),t(englishHint(q.lo),support(q.lo).hint))
+ for(const law of relevantLaws(q.lo)){
+  step(t('Principle · ','المبدأ · ')+t(law[2],law[3]),t(law[5],law[6]))
+ }
+ const sentences=r[lang()].split(/(?<=[.!?؟؛])\s+|\n+|(?=\([b-d]\)\s)/i).map(v=>v.trim()).filter(Boolean)
+ const explanatory=sentences.filter(v=>/because|since |therefore|conserv|proportional|correspond|depends|slope|area|direction|constant|produces|indicates|لأن|بسبب|بما أن|ميل|مساحة|يتناسب|ثبات|حفظ|اتجاه|يدل|يعني/i.test(v))
+ if(sentences.length>1 && explanatory.length){
+  const reasoning=explanatory.find(v=>v!==sentences.at(-1)) || explanatory[0]
+  step(t('Apply it to this question','تطبيق الفكرة على السؤال'),reasoning)
+ }
+ if(r.advice)step(t('Check your reasoning','راجع الفكرة'),t(r.adviceEn||englishHint(q.lo),r.advice))
+ const ideal=element('section');ideal.className='ideal';ideal.hidden=true
+ ideal.append(element('h3',t('Worked solution','الحل النموذجي')))
+ if(q.kind==='MCQ')ideal.append(element('strong',q.options.find(o=>o.key===r.correct)?.[lang()]))
+ const list=element('ol')
+ for(const line of sentences)list.append(element('li',line))
+ ideal.append(list,...figures(q,'solution',r.images))
+ const toggle=button('',()=>{ideal.hidden=!ideal.hidden;labelToggle()})
+ function labelToggle(){toggle.textContent=ideal.hidden?t('Show full worked solution','إظهار الحل النموذجي الكامل'):t('Hide worked solution','إخفاء الحل النموذجي');toggle.setAttribute('aria-expanded',!ideal.hidden)}
+ labelToggle();out.append(toggle,ideal)
+
 }
+$('walkthrough').onclick=guard(async()=>{
+ const q=items[index]
+ const review=await api('walkthrough',{id:q.id})
+ if(!inMock && items[index]===q){
+  showReview(q,review,null,true)
+  $('result').scrollIntoView({block:'nearest'})
+ }
+})
 $('check').onclick=guard(async()=>{
  const q=items[index]
  if(inMock){
-  if(!confirm('إنهاء الاختبار وعرض التصحيح؟'))return
+  if(!confirm(t('Finish the mock and review your answers?','إنهاء الاختبار وعرض التصحيح؟')))return
   await queue.catch(()=>{});await syncMock();mock=await api('mock/finish',{mock:mock.id});openMock();return
  }
  const answer=cache[q.id]?.response
- if(!answer?.trim())throw Error('أدخل إجابتك أولاً')
+ if(!answer?.trim() || (q.kind==='FRQ' && !hasResponse(answer)))throw Error('أدخل إجابتك أولاً')
  remember(q.id,answer,true);cache[q.id].lo=q.lo;persist();await schedule()
  if(items[index]===q&&!inMock&&replies[q.id])showReview(q,replies[q.id],answer)
 })
 $('next').onclick=()=>{if(index+1<items.length){index++;lesson()}}
-$('hint').onclick=()=>{const p=$('hintText');p.textContent=support(items[index].lo).hint;p.hidden=!p.hidden}
+$('hint').onclick=()=>{const p=$('hintText');p.textContent=t(englishHint(items[index].lo), support(items[index].lo).hint);p.hidden=!p.hidden}
 $('manual').onclick=()=>{
- const id=support(items[index].lo).guide;const [title,steps,example]=guides[id];const img=element('img')
- img.src='./manual/'+id+'.png';img.alt='شاشة الحاسبة في المثال التدريبي'
+ const id=support(items[index].lo).guide;const [title,steps]=t(englishGuides[id],guides[id]);const example=guides[id][2];const img=element('img')
+ img.src='./manual/'+id+'.png';img.alt=t('Calculator screen for the worked example','شاشة الحاسبة في المثال التدريبي')
  const ex=element('p',example);ex.dir='ltr'
- $('guideBody').replaceChildren(element('small','ClassWiz · دليل الحاسبة'),element('h2',title),element('p',steps),element('strong','مثال مستقل للتدريب'),ex,img,button('جرّب على الحاسبة',()=>{$('guide').close();$('open-floating-calculator').click()}))
- $('guide').showModal()
+ $('guideBody').replaceChildren(element('small',t('ClassWiz · Calculator guide','ClassWiz · دليل الحاسبة')),element('h2',title),element('p',steps),element('strong',t('Practice example','مثال مستقل للتدريب')),ex,img,button(t('Try the calculator','جرّب على الحاسبة'),()=>{$('guide').close();$('open-floating-calculator').click()}))
+ if(!$('guide').open)$('guide').showModal()
 }
 $('closeGuide').onclick=()=>$('guide').close()
 function tick(){
@@ -140,7 +212,18 @@ function tick(){
  if(!inMock||mock.done)return
  const seconds=Math.max(0,Math.ceil((mock.deadline-Date.now())/1000))
  $('clock').textContent=Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0')
- if(!seconds)void guard(async()=>{mock=await api('mock');if(inMock&&mock.done)openMock()})()
+ if(!seconds)void guard(async()=>{mock=await api('mock');if(inMock&&mock.done){openMock();if(activeTab==='laws')showTab('laws')}})()
 }
 window.addEventListener('online',guard(async()=>{await schedule();await syncMock()}));setInterval(tick,1000)
-installContentShield();void guard(init)()
+installContentShield()
+applyLanguage()
+for(const toggle of document.querySelectorAll('[data-switch]')){
+ toggle.onclick=()=>{
+  const hintVisible=!$('hintText').hidden
+  changeLanguage()
+  $('notice').textContent='';$('loginError').textContent=''
+  if(!$('lesson').hidden){lesson();if(hintVisible)$('hint').click();if($('guide').open)$('manual').click()}
+  else if(activeTab==='laws')renderLaws();else if(profile?.school)dashboard()
+ }
+}
+void guard(init)()

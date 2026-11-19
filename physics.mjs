@@ -1,8 +1,10 @@
+import { fieldsFor, coach } from './lib/coach.mjs'
 import { DatabaseSync } from 'node:sqlite'
 import { randomUUID } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 
 const bank = new DatabaseSync(new URL('./bank/physics.sqlite', import.meta.url), { readOnly: true })
+const feedbackEn = JSON.parse(readFileSync(new URL('./bank/feedback-en.json', import.meta.url), 'utf8'))
 const cards = bank.prepare(`SELECT l.id,l.grade,l.exam_slot slot,l.outcomes_en en,
  json_extract(l.data_json,'$.summary_ar') ar, count(q.id) total
  FROM learning_outcomes l JOIN questions q ON q.lo_id=l.id GROUP BY l.id ORDER BY l.grade,l.exam_slot`).all()
@@ -10,20 +12,26 @@ const byId = bank.prepare('SELECT data_json FROM questions WHERE id=?')
 const imageById = bank.prepare('SELECT path FROM images WHERE id=?')
 const question = id => JSON.parse(byId.get(id)?.data_json ?? 'null')
 const pictures = (q, role) => q.images.filter(i => i.role === role).map(i => i.asset_id)
-function prompt(q) {
-  return { id:q.id, lo:q.lo_id, kind:q.kind, ar:q.question_ar, en:q.question_en, options:q.options, images:pictures(q,'question') }
+function prompt(q,allowGap=true) {
+  return { id:q.id, lo:q.lo_id, kind:q.kind, ar:q.question_ar, en:q.question_en, options:q.options, fields:fieldsFor(q,allowGap), images:pictures(q,'question') }
 }
 function solution(q, response) {
   const selected = q.options.find(o => o.key === response)
   const correct = q.options.find(o => o.key === q.answer)
   let advice = q.misconception_ar || ''
+  let adviceEn = feedbackEn[q.id] || ''
   if (selected && correct && response !== q.answer) {
     const value = s => Number(s.replace(/−/g,'-').match(/^[+\-]?\d+(?:\.\d+)?/)?.[0] ?? NaN)
     const a = value(selected.en), b = value(correct.en)
-    if (a === -b && a !== 0) advice = 'المقدار متساوٍ لكن الإشارة مختلفة. راجع الاتجاه الموجب واتفاقية الإشارات.'
-    else if (Number.isFinite(a) && Number.isFinite(b) && a*b > 0 && [3,6,9].some(n=>Math.abs(Math.abs(Math.log10(a/b))-n)<0.0001)) advice = 'راجع بادئات الوحدات واكتب عامل التحويل قبل التعويض.'
+    if (a === -b && a !== 0) {
+      adviceEn = 'The magnitude agrees. Check your positive direction and sign convention.'
+      advice = 'المقدار متساوٍ لكن الإشارة مختلفة. راجع الاتجاه الموجب واتفاقية الإشارات.'
+    } else if (Number.isFinite(a) && Number.isFinite(b) && a*b > 0 && [3,6,9].some(n=>Math.abs(Math.abs(Math.log10(a/b))-n)<0.0001)) {
+      adviceEn = 'Check the unit prefixes and write the conversion factor before substituting.'
+      advice = 'راجع بادئات الوحدات واكتب عامل التحويل قبل التعويض.'
+    }
   }
-  return { correct:correct?.key, ar:q.solution_ar, en:q.solution_en, advice, images:pictures(q,'solution') }
+  return { correct:correct?.key, ar:q.solution_ar, en:q.solution_en, advice, adviceEn, coach:q.kind==='FRQ'?coach(q,response):null, images:pictures(q,'solution') }
 }
 
 export function physicsApi(db) {
@@ -31,8 +39,13 @@ export function physicsApi(db) {
     CREATE TABLE IF NOT EXISTS physics_progress(student TEXT, question TEXT, response TEXT, checked INTEGER, PRIMARY KEY(student,question));
     CREATE TABLE IF NOT EXISTS physics_mocks(id TEXT PRIMARY KEY,student TEXT,grade INTEGER,ids TEXT,answers TEXT,deadline INTEGER,done INTEGER);`)
   db.exec('CREATE TABLE IF NOT EXISTS physics_visits(student TEXT PRIMARY KEY, expires INTEGER NOT NULL)')
+  if (!db.prepare('PRAGMA table_info(physics_profiles)').all().some(column => column.name === 'school')) {
+    db.exec("ALTER TABLE physics_profiles ADD COLUMN school TEXT NOT NULL DEFAULT ''")
+  }
+  db.exec('CREATE TABLE IF NOT EXISTS physics_study_views(student TEXT, question TEXT, PRIMARY KEY(student,question))')
+  const studyView=db.prepare('SELECT 1 FROM physics_study_views WHERE student=? AND question=?')
   const activeVisit=db.prepare('SELECT 1 FROM physics_visits WHERE student=? AND expires>?')
-  const profile = db.prepare('SELECT name,started AS startedAt FROM physics_profiles WHERE student=?')
+  const profile = db.prepare('SELECT name,school,started AS startedAt FROM physics_profiles WHERE student=?')
   const progress = db.prepare('SELECT question,response,checked FROM physics_progress WHERE student=?')
   const write = db.prepare('INSERT INTO physics_progress VALUES(?,?,?,?) ON CONFLICT(student,question) DO UPDATE SET response=excluded.response,checked=excluded.checked')
   const getMock = db.prepare('SELECT * FROM physics_mocks WHERE student=? ORDER BY rowid DESC LIMIT 1')
@@ -44,7 +57,7 @@ export function physicsApi(db) {
     }
     const answers=JSON.parse(row.answers)
     return { id:row.id,grade:row.grade,answers,deadline:row.deadline,done:Boolean(row.done),
-      questions:JSON.parse(row.ids).map(id=>{const q=question(id);return {...prompt(q),...(row.done ? {review:solution(q,answers[id])} : {})}}) }
+      questions:JSON.parse(row.ids).map(id=>{const q=question(id);return {...prompt(q,false),...(row.done ? {review:solution(q,answers[id])} : {})}}) }
   }
   return async function(path,req,res,student,reply,readBody) {
     if (path === '/api/catalog' && req.method==='GET') return reply(200,{cards,profile:activeVisit.get(student, Date.now()) ? profile.get(student) : null})
@@ -52,12 +65,15 @@ export function physicsApi(db) {
     if (req.method==='POST') {
       try {body=await readBody(req); if (!body || typeof body!=='object') throw Error()} catch {return reply(400,{error:'طلب غير صالح'})}
     }
-    if(path==='/api/profile' && req.method==='POST' && typeof body.name==='string' && body.name.trim().length>=2 && body.name.length<=80){
-      db.prepare('INSERT INTO physics_profiles VALUES(?,?,?) ON CONFLICT(student) DO UPDATE SET name=excluded.name').run(student,body.name.trim(),new Date().toISOString())
+    if(path==='/api/profile' && req.method==='POST'){
+      const name=typeof body.name==='string' ? body.name.trim() : ''
+      const school=typeof body.school==='string' ? body.school.trim() : ''
+      if(name.length<2 || name.length>80 || school.length<2 || school.length>120)return reply(400,{error:'تحقق من اسم الطالب والمدرسة'})
+      db.prepare('INSERT INTO physics_profiles(student,name,started,school) VALUES(?,?,?,?) ON CONFLICT(student) DO UPDATE SET name=excluded.name,school=excluded.school').run(student,name,new Date().toISOString(),school)
       db.prepare('INSERT OR REPLACE INTO physics_visits VALUES(?,?)').run(student,Date.now()+86400000)
       return reply(200,profile.get(student))
     }
-    if(!activeVisit.get(student, Date.now())) return reply(403,{error:'انتهت جلسة التدريب. حدّث الصفحة وسجّل الدخول للمتابعة.'})
+    if(!activeVisit.get(student, Date.now()) || !profile.get(student)?.school) return reply(403,{error:'انتهت جلسة التدريب. حدّث الصفحة وسجّل الدخول للمتابعة.'})
     if(req.method==='GET'){
       if(path==='/api/progress') return reply(200,progress.all(student).map(r=>({...r,lo:question(r.question).lo_id})))
       if(path==='/api/mock') return reply(200,mockView(getMock.get(student)))
@@ -68,7 +84,7 @@ export function physicsApi(db) {
         const [, , ,id,role,index]=path.split('/')
         const q=question(id)
         const mock=getMock.get(student)
-        const reviewed=role==='solution' && (db.prepare('SELECT checked FROM physics_progress WHERE student=? AND question=?').get(student,id)?.checked || (mock?.done && JSON.parse(mock.ids).includes(id)))
+        const reviewed=role==='solution' && (db.prepare('SELECT checked FROM physics_progress WHERE student=? AND question=?').get(student,id)?.checked || studyView.get(student,id) || (mock?.done && JSON.parse(mock.ids).includes(id)))
         const asset=q && (role==='question'||reviewed) && pictures(q,role)[Number(index)]
         if(!asset)return reply(404,{error:'الصورة غير متاحة'})
         const file=imageById.get(asset).path
@@ -97,6 +113,12 @@ export function physicsApi(db) {
         }
       }
       return reply(200,mockView(getMock.get(student)))
+    }
+    if(path==='/api/walkthrough' && req.method==='POST'){
+      const q=typeof body.id==='string' && question(body.id)
+      if(!q)return reply(404,{error:'غير متاح'})
+      db.prepare('INSERT OR IGNORE INTO physics_study_views VALUES(?,?)').run(student,q.id)
+      return reply(200,solution(q,''))
     }
     if(path==='/api/record' && req.method==='POST'){
       const q=typeof body.id==='string' && question(body.id)
