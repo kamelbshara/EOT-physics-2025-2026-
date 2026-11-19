@@ -11,3 +11,5 @@ The supplied SQLite bank is read-only in `bank/physics.sqlite`. `PHYSICS_DB` can
 The math app's Arabic fonts, colour palette, student watermarks, content shield and vendored calculator are included. Browser copy, printing and focus protections deter casual copying. Operating-system screen captures are still possible. The calculator manual uses screenshots from the embedded fx-991CE X emulator and independent numerical examples. Source notices are in public/vendor and public/fonts.
 
 See BANK_REVIEW.md for scope and coverage.
+
+A student check-in expires after 24 hours. Returning students check in again on the same browser to continue their saved work. The app serves a read-only bank and has no web-based administrative editing endpoints.

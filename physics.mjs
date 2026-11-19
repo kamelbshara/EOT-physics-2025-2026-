@@ -30,6 +30,8 @@ export function physicsApi(db) {
   db.exec(`CREATE TABLE IF NOT EXISTS physics_profiles(student TEXT PRIMARY KEY,name TEXT NOT NULL,started TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS physics_progress(student TEXT, question TEXT, response TEXT, checked INTEGER, PRIMARY KEY(student,question));
     CREATE TABLE IF NOT EXISTS physics_mocks(id TEXT PRIMARY KEY,student TEXT,grade INTEGER,ids TEXT,answers TEXT,deadline INTEGER,done INTEGER);`)
+  db.exec('CREATE TABLE IF NOT EXISTS physics_visits(student TEXT PRIMARY KEY, expires INTEGER NOT NULL)')
+  const activeVisit=db.prepare('SELECT 1 FROM physics_visits WHERE student=? AND expires>?')
   const profile = db.prepare('SELECT name,started AS startedAt FROM physics_profiles WHERE student=?')
   const progress = db.prepare('SELECT question,response,checked FROM physics_progress WHERE student=?')
   const write = db.prepare('INSERT INTO physics_progress VALUES(?,?,?,?) ON CONFLICT(student,question) DO UPDATE SET response=excluded.response,checked=excluded.checked')
@@ -45,16 +47,17 @@ export function physicsApi(db) {
       questions:JSON.parse(row.ids).map(id=>{const q=question(id);return {...prompt(q),...(row.done ? {review:solution(q,answers[id])} : {})}}) }
   }
   return async function(path,req,res,student,reply,readBody) {
-    if (path === '/api/catalog' && req.method==='GET') return reply(200,{cards,profile:profile.get(student) ?? null})
+    if (path === '/api/catalog' && req.method==='GET') return reply(200,{cards,profile:activeVisit.get(student, Date.now()) ? profile.get(student) : null})
     let body={}
     if (req.method==='POST') {
       try {body=await readBody(req); if (!body || typeof body!=='object') throw Error()} catch {return reply(400,{error:'طلب غير صالح'})}
     }
     if(path==='/api/profile' && req.method==='POST' && typeof body.name==='string' && body.name.trim().length>=2 && body.name.length<=80){
       db.prepare('INSERT INTO physics_profiles VALUES(?,?,?) ON CONFLICT(student) DO UPDATE SET name=excluded.name').run(student,body.name.trim(),new Date().toISOString())
+      db.prepare('INSERT OR REPLACE INTO physics_visits VALUES(?,?)').run(student,Date.now()+86400000)
       return reply(200,profile.get(student))
     }
-    if(!profile.get(student)) return reply(403,{error:'أدخل اسمك لبدء التدريب'})
+    if(!activeVisit.get(student, Date.now())) return reply(403,{error:'انتهت جلسة التدريب. حدّث الصفحة وسجّل الدخول للمتابعة.'})
     if(req.method==='GET'){
       if(path==='/api/progress') return reply(200,progress.all(student).map(r=>({...r,lo:question(r.question).lo_id})))
       if(path==='/api/mock') return reply(200,mockView(getMock.get(student)))
