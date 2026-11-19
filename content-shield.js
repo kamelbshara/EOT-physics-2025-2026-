@@ -12,7 +12,7 @@ export function isBlockedKey(e) {
   if (mod && ['s', 'u'].includes(k)) return true;                                      // save / view-source
   return false;
 }
-const editable = t => !!(t && t.closest && t.closest('input,textarea,[contenteditable="true"]'));
+const editable = t => !!(t && t.closest && t.closest('math-field,input,textarea,[contenteditable="true"]'));
 // A student watching a video (playing, or in full screen) must not have it covered: on phones, full-screen video,
 // notifications and the video's own menus take the window focus, which made the shield hide the video mid-lesson
 // (teacher report 2026-11-16). Videos are already private, streamed per signed-in student and watermarked.
