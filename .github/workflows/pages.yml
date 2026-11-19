@@ -11,7 +11,24 @@ concurrency:
   group: physics-pages
   cancel-in-progress: false
 jobs:
+  verify-live:
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Check published page, calculator and database API
+        env:
+          SITE: https://kamelbshara.github.io/EOT-physics-2025-2026-
+          API: ${{ vars.PHYSICS_API_ORIGIN || 'https://physics-api-production.up.railway.app' }}
+        run: |
+          curl -fsSL --retry 3 "$SITE/" -o /tmp/physics-index
+          grep -Fq 'الهيكل 100 مع استاذ احمد غرايبة' /tmp/physics-index
+          curl -fsSL --retry 3 "$SITE/api-config.js" | grep -F "$API"
+          curl -fsSL --retry 3 "$SITE/vendor/fx991ce/src/index.html" | grep -F 'fx-991CE X'
+          curl -fsS --retry 3 -H 'Origin: https://kamelbshara.github.io' -D /tmp/physics-headers "$API/api/catalog" -o /tmp/physics-catalog
+          grep -iq '^access-control-allow-origin: https://kamelbshara.github.io' /tmp/physics-headers
+          jq -e '(.cards | length) == 80' /tmp/physics-catalog
   publish:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
