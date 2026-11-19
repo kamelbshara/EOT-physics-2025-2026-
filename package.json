@@ -1,1 +1,1 @@
-{"name":"eot-advanced-physics","private":true,"type":"module","engines":{"node":">=22.13"},"scripts":{"start":"node server.mjs"}}
+{"name":"eot-advanced-physics","private":true,"type":"module","engines":{"node":">=22.13"},"scripts":{"start":"node server.mjs","build:pages":"node scripts/build-pages.mjs"}}

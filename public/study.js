@@ -1,3 +1,4 @@
+import { apiOrigin } from './api-config.js'
 import { installContentShield } from './content-shield.js'
 import { setupFloatingCalculator } from './floating-calculator.js'
 import { questionWatermark, watermarkCss } from './watermark.js'
@@ -8,13 +9,13 @@ function element(tag,text){const node=document.createElement(tag);if(text!==unde
 function button(text,fn){const b=element('button',text);b.onclick=guard(fn);return b}
 function guard(fn){return async (...args)=>{try{await fn(...args)}catch(e){$('notice').textContent=e.message}}}
 async function api(path,body){
- const res=await fetch('/api/'+path,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+ const res=await fetch(apiOrigin+'/api/'+path,{credentials:'include',...(body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})})
  if(!res.ok)throw Error((await res.json()).error||'تعذّر الاتصال')
  return res.json()
 }
 let cards=[],profile,grade=9,current,items=[],index=0,mock=null,inMock=false,cache={},key,queue=Promise.resolve(),replies={},opened=0
 const style=element('style',watermarkCss);document.head.append(style)
-setupFloatingCalculator(document)
+setupFloatingCalculator(document, './')
 function persist(){try{localStorage.setItem(key,JSON.stringify(cache))}catch{$('notice').textContent='تعذّر الحفظ على الجهاز. تحقق من مساحة التخزين.'}}
 async function sync(){
  for(const [id,draft] of Object.entries(cache)){
@@ -64,7 +65,7 @@ $('resumeMock').onclick=()=>openMock()
 $('mockStart').onclick=guard(async()=>{if(!mock||mock.done)mock=await api('mock/new',{grade});openMock()})
 $('back').onclick=()=>dashboard()
 function figures(q,role,ids){
- return ids.map((id,i)=>{const img=element('img');img.src='/api/figure/'+q.id+'/'+role+'/'+i;img.alt=(role==='question'?'رسم السؤال ':'رسم الحل ')+(i+1);return img})
+ return ids.map((id,i)=>{const img=element('img');img.crossOrigin='use-credentials';img.src=apiOrigin+'/api/figure/'+q.id+'/'+role+'/'+i;img.alt=(role==='question'?'رسم السؤال ':'رسم الحل ')+(i+1);return img})
 }
 function lesson(){
  const q=items[index],draft=cache[q.id],answer=inMock?mock.answers[q.id]:draft?.response
@@ -128,7 +129,7 @@ $('next').onclick=()=>{if(index+1<items.length){index++;lesson()}}
 $('hint').onclick=()=>{const p=$('hintText');p.textContent=support(items[index].lo).hint;p.hidden=!p.hidden}
 $('manual').onclick=()=>{
  const id=support(items[index].lo).guide;const [title,steps,example]=guides[id];const img=element('img')
- img.src='/manual/'+id+'.png';img.alt='شاشة الحاسبة في المثال التدريبي'
+ img.src='./manual/'+id+'.png';img.alt='شاشة الحاسبة في المثال التدريبي'
  const ex=element('p',example);ex.dir='ltr'
  $('guideBody').replaceChildren(element('small','ClassWiz · دليل الحاسبة'),element('h2',title),element('p',steps),element('strong','مثال مستقل للتدريب'),ex,img,button('جرّب على الحاسبة',()=>{$('guide').close();$('open-floating-calculator').click()}))
  $('guide').showModal()

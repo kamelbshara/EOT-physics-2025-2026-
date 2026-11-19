@@ -16,6 +16,7 @@ const assets = new Map([
   ['/', ['index.html', 'text/html']],
 ])
 const physics = physicsApi(db)
+const pagesOrigin = process.env.PHYSICS_PAGES_ORIGIN || 'https://kamelbshara.github.io'
 const mime = {'.css':'text/css','.js':'text/javascript','.mjs':'text/javascript','.html':'text/html','.woff':'font/woff','.png':'image/png','.svg':'image/svg+xml'}
 for (const name of readdirSync(new URL('./public/', import.meta.url),{recursive:true})) {
   if (mime[extname(name)]) assets.set('/'+name,[name,mime[extname(name)]])
@@ -45,10 +46,29 @@ export async function handleRequest(request, response) {
       response.writeHead(200, { 'Content-Type': type + '; charset=utf-8' })
       return response.end(readFileSync(new URL('./public/' + name, import.meta.url)))
     }
+    const origin = request.headers.origin
+    const fromPages = origin === pagesOrigin
+    if (path.startsWith('/api/')) {
+      response.setHeader('Vary', 'Origin')
+      if (fromPages) {
+        response.setHeader('Access-Control-Allow-Origin', pagesOrigin)
+        response.setHeader('Access-Control-Allow-Credentials', 'true')
+        if (request.method === 'OPTIONS') {
+          response.writeHead(204, {
+            'Access-Control-Allow-Methods': 'GET, POST',
+            'Access-Control-Allow-Headers': 'Content-Type',
+          })
+          return response.end()
+        }
+      } else if (origin && new URL(origin).host !== request.headers.host) {
+        return reply(403, { error: 'Origin is not allowed' })
+      }
+    }
     let student = request.headers.cookie?.match(/(?:^|; *)physics_student=([a-f0-9-]{36})(?:;|$)/)?.[1]
     if (!student) {
       student = randomUUID()
-      response.setHeader('Set-Cookie', `physics_student=${student}; Path=/; HttpOnly; SameSite=Lax; Max-Age=31536000${request.headers['x-forwarded-proto'] === 'https' || request.socket.encrypted ? '; Secure' : ''}`)
+      const policy = fromPages ? 'SameSite=None; Secure; Partitioned' : 'SameSite=Lax' + (request.headers['x-forwarded-proto'] === 'https' || request.socket.encrypted ? '; Secure' : '')
+      response.setHeader('Set-Cookie', `physics_student=${student}; Path=/; HttpOnly; ${policy}; Max-Age=31536000`)
     }
     if (/^\/api\/(catalog|profile|progress|card|figure|record|mock)(?:\/|$)/.test(path)) {
       return await physics(path,request,response,student,reply,jsonBody)

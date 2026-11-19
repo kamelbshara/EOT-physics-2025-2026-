@@ -1,5 +1,5 @@
-@font-face{font-family:'Student Arabic';font-style:normal;font-weight:400 500;font-display:swap;src:url('/fonts/NotoSansArabic-Regular.woff') format('woff')}
-@font-face{font-family:'Student Arabic';font-style:normal;font-weight:600 900;font-display:swap;src:url('/fonts/NotoSansArabic-Bold.woff') format('woff')}
+@font-face{font-family:'Student Arabic';font-style:normal;font-weight:400 500;font-display:swap;src:url('./fonts/NotoSansArabic-Regular.woff') format('woff')}
+@font-face{font-family:'Student Arabic';font-style:normal;font-weight:600 900;font-display:swap;src:url('./fonts/NotoSansArabic-Bold.woff') format('woff')}
 @media screen{
 :root{background:#f7f8f2;--ink:#153c35;--muted:#65726a;--teal:#086254;--teal-soft:#e7f2e9;--indigo:#62509e;--indigo-soft:#f0edf8;--apricot:#a84e36;--apricot-soft:#fcf0e9;--line:#e0e5dc;--surface:#fff;--student-lime:#d8efa8;--student-cream:#f7f8f2}
 body.student-design,body.student-design.practice-mode{min-height:100vh;color:var(--ink);background:var(--student-cream);font-family:'Student Arabic',Arial,sans-serif}

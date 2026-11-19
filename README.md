@@ -13,3 +13,11 @@ The math app's Arabic fonts, colour palette, student watermarks, content shield 
 See BANK_REVIEW.md for scope and coverage.
 
 A student check-in expires after 24 hours. Returning students check in again on the same browser to continue their saved work. The app serves a read-only bank and has no web-based administrative editing endpoints.
+
+## GitHub Pages
+
+The Pages workflow builds the student interface under the repository's project path. It publishes only files from `public/`. The Node service continues to serve private figures, grading and SQLite progress.
+
+Deploy this repository's Node server on an HTTPS origin with a persistent disk for `PHYSICS_DB`. Its default allowed frontend origin is `https://kamelbshara.github.io`; for a custom Pages domain, set `PHYSICS_PAGES_ORIGIN` on the server. The separate frontend uses secure partitioned cookies in compatible browsers.
+
+In GitHub's Pages settings select **GitHub Actions**. Set the repository Actions variable `PHYSICS_API_ORIGIN` to the backend's HTTPS origin, then run **Deploy Physics to GitHub Pages**. Subsequent pushes to main redeploy the interface. The workflow waits for that variable before publishing. Same-origin Node hosting still works with `npm start`.
