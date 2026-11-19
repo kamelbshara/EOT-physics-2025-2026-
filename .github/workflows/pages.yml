@@ -12,7 +12,6 @@ concurrency:
   cancel-in-progress: false
 jobs:
   publish:
-    if: vars.PHYSICS_API_ORIGIN != ''
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -23,9 +22,11 @@ jobs:
         with:
           node-version: 24
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - run: npm run build:pages
         env:
-          PHYSICS_API_ORIGIN: ${{ vars.PHYSICS_API_ORIGIN }}
+          PHYSICS_API_ORIGIN: ${{ vars.PHYSICS_API_ORIGIN || 'https://physics-api-production.up.railway.app' }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist/pages

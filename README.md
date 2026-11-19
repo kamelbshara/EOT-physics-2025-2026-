@@ -20,4 +20,4 @@ The Pages workflow builds the student interface under the repository's project p
 
 Deploy this repository's Node server on an HTTPS origin with a persistent disk for `PHYSICS_DB`. Its default allowed frontend origin is `https://kamelbshara.github.io`; for a custom Pages domain, set `PHYSICS_PAGES_ORIGIN` on the server. The separate frontend uses secure partitioned cookies in compatible browsers.
 
-In GitHub's Pages settings select **GitHub Actions**. Set the repository Actions variable `PHYSICS_API_ORIGIN` to the backend's HTTPS origin, then run **Deploy Physics to GitHub Pages**. Subsequent pushes to main redeploy the interface. The workflow waits for that variable before publishing. Same-origin Node hosting still works with `npm start`.
+The production workflow uses https://physics-api-production.up.railway.app and can be overridden with the Actions variable `PHYSICS_API_ORIGIN`. It requests Pages enablement and publishes after pushes to main. If GitHub requires repository-owner setup, select **GitHub Actions** in the repository's Pages settings, then rerun **Deploy Physics to GitHub Pages**. Same-origin Node hosting also works with `npm start`.
