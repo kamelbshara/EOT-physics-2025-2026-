@@ -2,6 +2,17 @@ import {lang,t} from './language.js'
 import {apiOrigin} from './api-config.js'
 import {questionWatermark} from './watermark.js'
 
+function appendNotation(node,text){
+ const parts=String(text).split(/(θ_c|λ_medium|x_red|x_blue|n_film|n_air)/u)
+ for(const [i,part] of parts.entries()){
+  if(i%2===0){node.append(part);continue}
+  const [base,index]=part.split('_')
+  const sub=document.createElement('sub')
+  sub.textContent=index
+  node.append(base,sub)
+ }
+}
+
 export function writePhysicsText(node,text,language=lang()){
  node.replaceChildren()
  // Keep mixed numbers, units and equations in reading order inside Arabic prose.
@@ -11,10 +22,10 @@ export function writePhysicsText(node,text,language=lang()){
    if(i%2===0){node.append(run);continue}
    const isolated=document.createElement('bdi')
    isolated.dir='ltr'
-   isolated.textContent=run.trimEnd()
-   node.append(isolated,run.slice(isolated.textContent.length))
+   appendNotation(isolated,run.trimEnd())
+   node.append(isolated,run.slice(run.trimEnd().length))
   }
- }else node.textContent=text
+ }else appendNotation(node,text)
 }
 
 function el(tag,text){

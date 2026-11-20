@@ -61,7 +61,7 @@ export default {
   },
   "G10A-Q04": {
     "problem": {
-      "en": "A concave mirror has f = +8 cm and dₒ = +24 cm. Find the image distance.",
+      "en": "A concave mirror has f = +8 cm and xₒ = +24 cm. Find the image distance.",
       "ar": "البعد البؤري لمرآة مقعرة +8 cm وبُعد الجسم +24 cm. جد بُعد الصورة."
     },
     "strategy": {
@@ -70,12 +70,12 @@ export default {
     },
     "steps": [
       {
-        "en": "1/dᵢ = 1/8 − 1/24 = 2/24 cm⁻¹. Subtract because 1/dₒ moves to the other side.",
-        "ar": "1/dᵢ = 1/8 − 1/24 = 2/24 cm⁻¹. نطرح لأننا نعزل مقلوب بُعد الصورة."
+        "en": "1/xᵢ = 1/8 − 1/24 = 2/24 cm⁻¹. Subtract because 1/xₒ moves to the other side.",
+        "ar": "1/xᵢ = 1/8 − 1/24 = 2/24 cm⁻¹. نطرح لأننا نعزل مقلوب بُعد الصورة."
       },
       {
-        "en": "Invert the result to get dᵢ = +12 cm. The positive sign locates a real image in front of the mirror.",
-        "ar": "اقلب الناتج فتحصل على dᵢ = +12 cm. تدل الإشارة الموجبة على صورة حقيقية أمام المرآة."
+        "en": "Invert the result to get xᵢ = +12 cm. The positive sign locates a real image in front of the mirror.",
+        "ar": "اقلب الناتج فتحصل على xᵢ = +12 cm. تدل الإشارة الموجبة على صورة حقيقية أمام المرآة."
       }
     ]
   },
@@ -130,11 +130,11 @@ export default {
     },
     "steps": [
       {
-        "en": "Glass to air is higher to lower index, so a critical angle exists. sin θc = 1.00/1.60 = 0.625.",
-        "ar": "ينتقل الضوء من معامل أكبر إلى أصغر، فتوجد زاوية حرجة ويكون sin θc = 1.00/1.60 = 0.625."
+        "en": "Glass to air is higher to lower index, so a critical angle exists. sin θ_c = 1.00/1.60 = 0.625.",
+        "ar": "ينتقل الضوء من معامل أكبر إلى أصغر، فتوجد زاوية حرجة ويكون sin θ_c = 1.00/1.60 = 0.625."
       },
       {
-        "en": "θc ≈ 38.7°. Since 42° exceeds it, total internal reflection occurs at the interface.",
+        "en": "θ_c ≈ 38.7°. Since 42° exceeds it, total internal reflection occurs at the interface.",
         "ar": "الزاوية الحرجة نحو 38.7°. ولأن 42° أكبر منها يحدث انعكاس كلي داخلي."
       }
     ]
@@ -274,8 +274,8 @@ export default {
         "ar": "ينقلب الطور نصف دورة عند الانعكاس من الهواء إلى الغشاء فقط. ولمطابقة الطور يلزم نصف دورة إضافي من فرق المسار البصري."
       },
       {
-        "en": "Set 2nt = λ/2, so t = 600/(4 × 1.5) = 100 nm. The factor two accounts for travel through the film and back.",
-        "ar": "ضع 2nt = λ/2، فيكون t = 600/(4 × 1.5) = 100 nm. يظهر العامل 2 لأن الشعاع يعبر الغشاء ذهابًا وإيابًا."
+        "en": "Set 2d = λ/(2n), so d = 600/(4 × 1.5) = 100 nm. The factor two accounts for travel through the film and back.",
+        "ar": "ضع 2d = λ/(2n)، فيكون d = 600/(4 × 1.5) = 100 nm. يظهر العامل 2 لأن الشعاع يعبر الغشاء ذهابًا وإيابًا."
       }
     ]
   },
@@ -321,8 +321,8 @@ export default {
   },
   "G10A-Q17": {
     "problem": {
-      "en": "A convex mirror has f = −12 cm and dₒ = +12 cm. Predict the image and explain a practical use.",
-      "ar": "لمرآة محدبة f = −12 cm وdₒ = +12 cm. توقّع الصورة وفسّر استخدامًا عمليًا."
+      "en": "A convex mirror has f = −12 cm and xₒ = +12 cm. Predict the image and explain a practical use.",
+      "ar": "لمرآة محدبة f = −12 cm وxₒ = +12 cm. توقّع الصورة وفسّر استخدامًا عمليًا."
     },
     "strategy": {
       "en": "Find image distance first, then use its sign and magnification to interpret the ray diagram.",
@@ -330,8 +330,8 @@ export default {
     },
     "steps": [
       {
-        "en": "1/dᵢ = −1/12 − 1/12 = −1/6, so dᵢ = −6 cm. The rays appear to meet behind the mirror.",
-        "ar": "1/dᵢ = −1/12 − 1/12 = −1/6، إذن dᵢ = −6 cm. تبدو الأشعة كأنها تلتقي خلف المرآة."
+        "en": "1/xᵢ = −1/12 − 1/12 = −1/6, so xᵢ = −6 cm. The rays appear to meet behind the mirror.",
+        "ar": "1/xᵢ = −1/12 − 1/12 = −1/6، إذن xᵢ = −6 cm. تبدو الأشعة كأنها تلتقي خلف المرآة."
       },
       {
         "en": "m = −(−6)/12 = +0.5. The upright reduced image and wide field of view are useful for seeing around a blind corner.",
@@ -381,7 +381,7 @@ export default {
   },
   "G10A-Q20": {
     "problem": {
-      "en": "For a single slit a = 0.30 mm, λ = 600 nm and L = 1.50 m, find the full central width.",
+      "en": "For a single slit w = 0.30 mm, λ = 600 nm and L = 1.50 m, find the full central width.",
       "ar": "في شق مفرد عرضه 0.30 mm، والطول الموجي 600 nm وبُعد الشاشة 1.50 m. احسب العرض المركزي الكامل."
     },
     "strategy": {
@@ -390,12 +390,12 @@ export default {
     },
     "steps": [
       {
-        "en": "For small angles y₁ ≈ λL/a = (600 × 10⁻⁹)(1.50)/(0.30 × 10⁻³) = 3.0 mm.",
-        "ar": "للزوايا الصغيرة y₁ ≈ λL/a = (600 × 10⁻⁹)(1.50)/(0.30 × 10⁻³) = 3.0 mm."
+        "en": "For small angles x₁ ≈ λL/w = (600 × 10⁻⁹)(1.50)/(0.30 × 10⁻³) = 3.0 mm.",
+        "ar": "للزوايا الصغيرة x₁ ≈ λL/w = (600 × 10⁻⁹)(1.50)/(0.30 × 10⁻³) = 3.0 mm."
       },
       {
-        "en": "The central maximum stretches from −y₁ to +y₁, so W = 2y₁ = 6.0 mm.",
-        "ar": "تمتد العظمى المركزية من −y₁ إلى +y₁، ولذلك W = 2y₁ = 6.0 mm."
+        "en": "The central maximum stretches from −x₁ to +x₁, so 2x₁ = 6.0 mm.",
+        "ar": "تمتد العظمى المركزية من −x₁ إلى +x₁، ولذلك 2x₁ = 6.0 mm."
       }
     ]
   }

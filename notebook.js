@@ -1,6 +1,7 @@
 import {writePhysicsText} from './question-paper.js'
 import {lang,t} from './language.js'
 import {laws,relevantLaws} from './laws.js'
+import {equations,slitFigures} from './textbook/grade-10.js'
 import {plateCaptions} from './plates.js'
 import {englishHint} from './english-support.js'
 import {support} from './guides.js'
@@ -28,15 +29,38 @@ function diagram(id){
  return figure
 }
 
+function bookFigure(asset,page,caption,notation){
+ const figure=el('figure')
+ figure.className=notation?'book-equation':'law-figure book-diagram'
+ const img=el('img')
+ img.src='./textbook/10/'+asset+'.png'
+ img.alt=notation||''
+ img.dir='ltr'
+ const label=el('figcaption',caption+t(' · p. ',' · ص ')+page)
+ figure.append(img,label)
+ return figure
+}
+
 export function makeLawCard(row){
  const id=laws.indexOf(row)
  const card=el('article')
  card.className='law-card'
  card.id='law-'+id
  card.tabIndex=-1
- const equation=el('p',row[4])
- equation.className='formula'
- card.append(el('h3',t(row[2],row[3])),diagram(id),equation,el('p',t(row[5],row[6])))
+ card.append(el('h3',t(row[2],row[3])))
+ if(Array.isArray(row[4])){
+  const figure=slitFigures[row[4][0]]
+  card.append(figure?bookFigure(figure[0],figure[1],t(figure[2],figure[3])):diagram(id))
+  for(const asset of row[4]){
+   const [page,notation,en,ar]=equations[asset]
+   card.append(bookFigure(asset,page,t(en,ar),notation))
+  }
+ }else{
+  const equation=el('p',row[4])
+  equation.className='formula'
+  card.append(diagram(id),equation)
+ }
+ card.append(el('p',t(row[5],row[6])))
  return card
 }
 

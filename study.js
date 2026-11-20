@@ -1,6 +1,7 @@
 import {figures,measurements,writePhysicsText} from './question-paper.js'
 import { makeLawCard, makeExample } from './notebook.js'
 import { writtenEditor, hasResponse, parseDraft } from './math-input.js'
+import {bookUrl} from './textbook/grade-10.js'
 import { laws, relevantLaws } from './laws.js'
 import { lang, t, changeLanguage, applyLanguage, errorText } from './language.js'
 import { englishHint, englishGuides } from './english-support.js'
@@ -96,7 +97,16 @@ function showTab(tab){
  window.scrollTo(0,tab==='practice'?practiceScroll:0)
 }
 function renderLaws(){
- $('lawCards').replaceChildren(...laws.filter(row=>row[0]===Number($('lawGrade').value)).map(makeLawCard))
+ const gradeNumber=Number($('lawGrade').value)
+ const source=$('lawSource')
+ if(gradeNumber===10){
+  const link=element('a',t('Open student book','افتح كتاب الطالب'))
+  link.href=bookUrl
+  link.target='_blank'
+  link.rel='noopener noreferrer'
+  source.replaceChildren(t('Equations are reproduced from UAE Inspire Science Physics, 2024–25 student edition. Page numbers refer to the printed book. ','القوانين مصوّرة من كتاب الطالب الإماراتي Inspire Science Physics، طبعة 2024–2025. يشير رقم الصفحة إلى الصفحة المطبوعة. '),link)
+ }else source.textContent=t('The notation for this grade is awaiting comparison with the school edition.','رموز هذا الصف بانتظار المطابقة مع النسخة المدرسية.')
+ $('lawCards').replaceChildren(...laws.filter(row=>row[0]===gradeNumber).map(makeLawCard))
 }
 function openLaw(gradeNumber,id){
  fromExample=true
@@ -305,9 +315,17 @@ function showReview(q,r,answer,studyOnly=false){
  if(!answered && r.advice)step(t('Check your reasoning','راجع الفكرة'),t(r.adviceEn||englishHint(q.lo),r.advice))
  const ideal=element('section');ideal.className='ideal';ideal.hidden=true
  ideal.append(element('h3',t('Worked solution','الحل النموذجي')))
- if(q.kind==='MCQ')ideal.append(element('strong',q.options.find(o=>o.key===r.correct)?.[lang()]))
+ if(q.kind==='MCQ'){
+  const correct=element('strong')
+  writePhysicsText(correct,q.options.find(o=>o.key===r.correct)?.[lang()]||'')
+  ideal.append(correct)
+ }
  const list=element('ol')
- for(const line of sentences)list.append(element('li',line))
+ for(const line of sentences){
+  const item=element('li')
+  writePhysicsText(item,line)
+  list.append(item)
+ }
  ideal.append(list,...figures(q,'solution',r.images,r.figureNotes))
  const toggle=button('',()=>{ideal.hidden=!ideal.hidden;labelToggle()})
  function labelToggle(){toggle.textContent=ideal.hidden?t('Show full worked solution','إظهار الحل النموذجي الكامل'):t('Hide worked solution','إخفاء الحل النموذجي');toggle.setAttribute('aria-expanded',!ideal.hidden)}
