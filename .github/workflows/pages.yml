@@ -35,7 +35,11 @@ jobs:
           grep -Fq '<html lang="en" dir="ltr">' /tmp/physics-index
           grep -Fq 'id="school"' /tmp/physics-index
           grep -Fq 'id="outcomesLink"' /tmp/physics-index
-          curl -fsSL --retry 3 "$SITE/outcomes.html" -o /tmp/physics-outcomes
+          for attempt in {1..30}; do
+            curl -fsSL "$SITE/outcomes.html?v=$GITHUB_SHA" -o /tmp/physics-outcomes && grep -Fq 'href="./#G12A-Q20"' /tmp/physics-outcomes && break
+            sleep 5
+          done
+          test "$(grep -c 'href="./#G' /tmp/physics-outcomes)" -eq 80
           for grade in 9 10 11 12; do
             test "$(grep -c "<li id=\"g${grade}-q" /tmp/physics-outcomes)" -eq 20
           done

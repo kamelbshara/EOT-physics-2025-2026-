@@ -1,6 +1,6 @@
 # Physics bank review
 
-The release contains 675 bilingual items, comprising 439 MCQs and 236 written responses. The app uses the 80 supplied Term 1 blueprint rows as coverage cards. The Arabic indicator descriptions are editorial. Each row meets the five-item minimum in its prescribed response format. The 323 revised editions have distinct IDs, and previous prompts and answer keys are retained for review of saved attempts.
+The release contains 675 bilingual items, comprising 439 MCQs and 236 written responses. The app uses the 80 supplied Term 1 blueprint rows as coverage cards. The Arabic indicator descriptions are editorial. Each row meets the five-item minimum in its prescribed response format. The 323 revised editions have distinct IDs, and previous prompts and answer keys are retained for review of saved attempts. When the prompt and response key are identical, a student’s previous answer also follows the question to its revised card.
 
 | Grade | Cards | Questions | Smallest card | Largest card |
 |---|---:|---:|---:|---:|

@@ -11,6 +11,11 @@ const cards = bank.prepare(`SELECT l.id,l.grade,l.exam_slot slot,l.outcomes_en e
  FROM learning_outcomes l JOIN questions q ON q.lo_id=l.id AND q.kind=json_extract(l.data_json,'$.type') GROUP BY l.id ORDER BY l.grade,l.exam_slot`).all()
 const byId = bank.prepare('SELECT data_json FROM questions WHERE id=? UNION ALL SELECT data_json FROM previous_questions WHERE id=?')
 const retired = new Set(bank.prepare('SELECT id FROM previous_questions').all().map(row=>row.id))
+const movedWithoutEdits = new Map(bank.prepare(`SELECT p.id,p.replacement FROM previous_questions p
+ JOIN questions q ON q.id=p.replacement
+ WHERE q.kind=json_extract(p.data_json,'$.kind') AND q.question_en=json_extract(p.data_json,'$.question_en')
+ AND q.question_ar=json_extract(p.data_json,'$.question_ar') AND q.answer=json_extract(p.data_json,'$.answer')
+ AND json_extract(q.data_json,'$.options')=json_extract(p.data_json,'$.options')`).all().map(r=>[r.id,r.replacement]))
 const cardQuestions = bank.prepare(`SELECT q.data_json FROM questions q JOIN learning_outcomes l ON l.id=q.lo_id
  WHERE l.id=? AND q.kind=json_extract(l.data_json,'$.type')
  ORDER BY coalesce(json_extract(q.data_json,'$.base_id'),q.id)`)
@@ -77,6 +82,18 @@ export function physicsApi(db) {
   const profile = db.prepare('SELECT name,school,started AS startedAt FROM physics_profiles WHERE student=?')
   const progress = db.prepare('SELECT question,response,checked FROM physics_progress WHERE student=?')
   const write = db.prepare('INSERT INTO physics_progress VALUES(?,?,?,?) ON CONFLICT(student,question) DO UPDATE SET response=excluded.response,checked=excluded.checked')
+  const copyProgress=db.prepare('INSERT OR IGNORE INTO physics_progress(student,question,response,checked) VALUES(?,?,?,?)')
+  function studentProgress(student){
+    const rows=progress.all(student)
+    const ids=new Set(rows.map(r=>r.question))
+    for(const r of rows.slice()){
+      const replacement=movedWithoutEdits.get(r.question)
+      if(!replacement || ids.has(replacement))continue
+      copyProgress.run(student,replacement,r.response,r.checked)
+      rows.push({...r,question:replacement})
+    }
+    return rows.map(r=>({...r,lo:retired.has(r.question)?null:question(r.question)?.lo_id}))
+  }
   const getMock = db.prepare('SELECT * FROM physics_mocks WHERE student=? ORDER BY rowid DESC LIMIT 1')
   function mockView(row) {
     if (!row) return null
@@ -104,7 +121,7 @@ export function physicsApi(db) {
     }
     if(!activeVisit.get(student, Date.now()) || !profile.get(student)?.school) return reply(403,{error:'انتهت جلسة التدريب. حدّث الصفحة وسجّل الدخول للمتابعة.'})
     if(req.method==='GET'){
-      if(path==='/api/progress') return reply(200,progress.all(student).map(r=>({...r,lo:retired.has(r.question)?null:question(r.question)?.lo_id})))
+      if(path==='/api/progress') return reply(200,studentProgress(student))
       if(path==='/api/mock') return reply(200,mockView(getMock.get(student)))
       if(path.startsWith('/api/card/')){
         return reply(200,practiceOrder(cardQuestions.all(path.slice(10)).map(r=>JSON.parse(r.data_json))).map(q=>prompt(q)))
