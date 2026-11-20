@@ -1,3 +1,4 @@
+import { makeLawCard, makeExample } from './notebook.js'
 import { writtenEditor, hasResponse } from './math-input.js'
 import { laws, relevantLaws } from './laws.js'
 import { lang, t, changeLanguage, applyLanguage, errorText } from './language.js'
@@ -53,31 +54,74 @@ async function init(){
 }
 $('loginForm').onsubmit=guard(async e=>{e.preventDefault();await api('profile',{name:$('name').value,school:$('school').value});$('login').close();await init()})
 $('login').addEventListener('cancel',e=>e.preventDefault())
+let exampleRequest=0
+let fromExample=false
+let practiceScroll=0
+let practiceLanguage='en'
+let exampleLawReturn=false
 function showTab(tab){
+ if(activeTab==='practice'&&tab!=='practice'){
+  practiceScroll=window.scrollY
+  practiceLanguage=lang()
+ }
  activeTab=tab
  $('lawsPage').hidden=tab!=='laws'
- $('dashboard').hidden=tab==='laws'||Boolean(items.length)
- $('lesson').hidden=tab==='laws'||!items.length
- $('practiceTab').setAttribute('aria-selected',tab==='practice')
- $('lawsTab').setAttribute('aria-selected',tab==='laws')
+ $('examplesPage').hidden=tab!=='examples'
+ $('dashboard').hidden=tab!=='practice'||Boolean(items.length)
+ $('lesson').hidden=tab!=='practice'||!items.length
+ $('examplesTab').setAttribute('aria-pressed',tab==='examples')
+ $('lawsTab').setAttribute('aria-pressed',tab==='laws')
+ $('toExamples').hidden=!fromExample
  if(tab==='laws')renderLaws()
- else if(items.length)lesson()
- else dashboard()
+ else if(tab==='examples'){
+  if(!exampleLawReturn || !$('exampleContent').firstElementChild)void guard(renderExamples)()
+  exampleLawReturn=false
+ }else if(practiceLanguage!==lang()){
+  if(items.length)lesson()
+  else dashboard()
+ }
+ window.scrollTo(0,tab==='practice'?practiceScroll:0)
 }
 function renderLaws(){
- const selected=Number($('lawGrade').value)
- $('lawCards').replaceChildren(...laws.filter(row=>row[0]===selected).map(row=>{
-  const article=element('article');article.className='law-card'
-  const formula=element('p',row[4]);formula.className='formula'
-  article.append(element('h3',t(row[2],row[3])),formula,element('p',t(row[5],row[6])))
-  return article
- }))
+ $('lawCards').replaceChildren(...laws.filter(row=>row[0]===Number($('lawGrade').value)).map(makeLawCard))
 }
-$('practiceTab').onclick=()=>showTab('practice')
-$('lawsTab').onclick=()=>{$('lawGrade').value=String(inMock?mock.grade:grade);showTab('laws')}
+function openLaw(gradeNumber,id){
+ fromExample=true
+ $('lawGrade').value=String(gradeNumber);showTab('laws')
+ const section=$('law-'+id)
+ section?.focus({preventScroll:true});section?.scrollIntoView({block:'center'})
+}
+function openExamples(){
+ if(inMock&&!mock?.done)return
+ const currentId=items[index]?.lo
+ const group=cards.filter(c=>c.grade===(inMock?mock.grade:grade))
+ $('exampleSlot').replaceChildren(...group.map(c=>{
+  const o=element('option',c.id);o.value=c.id;return o
+ }))
+ if(currentId)$('exampleSlot').value=currentId
+ $('examplePicker').hidden=Boolean(currentId)
+ showTab('examples')
+}
+async function renderExamples(){
+ const req=++exampleRequest
+ const card=cards.find(c=>c.id===$('exampleSlot').value)
+ if(!card)return
+ const container=$('exampleContent')
+ container.replaceChildren()
+ const article=await makeExample({card,activeId:items[index]?.id,openLaw,api,figures})
+ if(req===exampleRequest && activeTab==='examples')container.replaceChildren(article)
+}
+$('practiceTab').onclick=$('guideReturn').onclick=()=>showTab('practice')
+$('toExamples').onclick=()=>{exampleLawReturn=true;showTab('examples')}
+$('examplesTab').onclick=()=>activeTab==='examples'?showTab('practice'):openExamples()
+$('exampleSlot').onchange=guard(renderExamples)
+$('lawsTab').onclick=()=>{
+ if(activeTab==='laws'){showTab('practice');return}
+ fromExample=activeTab==='examples';$('lawGrade').value=String(inMock?mock.grade:grade);showTab('laws')
+}
 $('lawGrade').onchange=renderLaws
 function dashboard(){
- items=[];$('studyTabs').hidden=false;opened++;inMock=false;$('lesson').hidden=true;$('dashboard').hidden=false;$('notice').textContent=''
+ items=[];$('studyTabs').hidden=false;$('panelManual').disabled=$('examplesTab').disabled=false;opened++;inMock=false;$('lesson').hidden=true;$('dashboard').hidden=false;$('notice').textContent=''
  $('gradeTabs').replaceChildren(...[9,10,11,12].map(n=>{const b=button(t('Grade ','الصف ')+n,()=>{grade=n;dashboard()});b.setAttribute('aria-pressed',n===grade);return b}))
  const group=cards.filter(c=>c.grade===grade);$('gradeTitle').textContent=t('Grade '+grade+' Advanced · '+group.length+' outcomes','الصف '+grade+' المتقدم · '+group.length+' مؤشراً')
  $('cards').replaceChildren(...group.map(c=>{
@@ -105,6 +149,7 @@ function lesson(){
  $('meta').textContent=(q.kind==='MCQ'?t('Multiple choice','اختيار من متعدد'):t('Written response','إجابة مكتوبة'))+' · '+(index+1)+' / '+items.length
  $('wm').innerHTML=questionWatermark();$('stem').textContent=q[lang()];$('altLang').textContent=t('العربية','English');$('english').lang=t('ar','en');$('english').dir=t('rtl','ltr');$('english').textContent=q[t('ar','en')];$('images').replaceChildren(...figures(q,'question',q.images))
  const inputs=$('inputs');inputs.replaceChildren()
+ $('panelManual').disabled=$('examplesTab').disabled=inMock&&!mock.done
  const readonly=inMock&&mock.done
  function edit(value){
   $('result').hidden=true
@@ -199,12 +244,23 @@ $('check').onclick=guard(async()=>{
 })
 $('next').onclick=()=>{if(index+1<items.length){index++;lesson()}}
 $('hint').onclick=()=>{const p=$('hintText');p.textContent=t(englishHint(items[index].lo), support(items[index].lo).hint);p.hidden=!p.hidden}
-$('manual').onclick=()=>{
- const id=support(items[index].lo).guide;const [title,steps]=t(englishGuides[id],guides[id]);const example=guides[id][2];const img=element('img')
+function showManual(id){
+ const [title,steps]=t(englishGuides[id],guides[id]);const example=guides[id][2];const img=element('img')
  img.src='./manual/'+id+'.png';img.alt=t('Calculator screen for the worked example','شاشة الحاسبة في المثال التدريبي')
  const ex=element('p',example);ex.dir='ltr'
  $('guideBody').replaceChildren(element('small',t('ClassWiz · Calculator guide','ClassWiz · دليل الحاسبة')),element('h2',title),element('p',steps),element('strong',t('Practice example','مثال مستقل للتدريب')),ex,img,button(t('Try the calculator','جرّب على الحاسبة'),()=>{$('guide').close();$('open-floating-calculator').click()}))
+ const choose=element('select')
+ choose.setAttribute('aria-label',t('Calculator technique','مهارة استخدام الحاسبة'))
+ for(const [code,guide] of Object.entries(t(englishGuides,guides))){
+  const option=element('option',guide[0]);option.value=code;choose.append(option)
+ }
+ choose.value=id;choose.onchange=()=>showManual(choose.value);choose.id='manualTechnique'
+ $('guideBody').prepend(choose)
  if(!$('guide').open)$('guide').showModal()
+}
+$('panelManual').onclick=$('manual').onclick=()=>{
+ const lo=activeTab==='examples'?$('exampleSlot').value:items[index]?.lo
+ showManual(lo?support(lo).guide:'concept')
 }
 $('closeGuide').onclick=()=>$('guide').close()
 function tick(){
@@ -221,9 +277,11 @@ for(const toggle of document.querySelectorAll('[data-switch]')){
  toggle.onclick=()=>{
   const hintVisible=!$('hintText').hidden
   changeLanguage()
+  if(activeTab==='laws')$('exampleContent').replaceChildren()
   $('notice').textContent='';$('loginError').textContent=''
-  if(!$('lesson').hidden){lesson();if(hintVisible)$('hint').click();if($('guide').open)$('manual').click()}
-  else if(activeTab==='laws')renderLaws();else if(profile?.school)dashboard()
+  if(!$('lesson').hidden){lesson();if(hintVisible)$('hint').click()}
+  else if(activeTab==='laws')renderLaws();else if(activeTab==='examples')void guard(renderExamples)();else if(profile?.school)dashboard()
+  if($('guide').open)showManual($('manualTechnique').value)
  }
 }
 void guard(init)()
