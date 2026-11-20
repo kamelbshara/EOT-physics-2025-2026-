@@ -6,11 +6,16 @@ import { readFileSync } from 'node:fs'
 const bank = new DatabaseSync(new URL('./bank/physics.sqlite', import.meta.url), { readOnly: true })
 const feedbackEn = JSON.parse(readFileSync(new URL('./bank/feedback-en.json', import.meta.url), 'utf8'))
 const cards = bank.prepare(`SELECT l.id,l.grade,l.exam_slot slot,l.outcomes_en en,
- json_extract(l.data_json,'$.summary_ar') ar, count(q.id) total
- FROM learning_outcomes l JOIN questions q ON q.lo_id=l.id GROUP BY l.id ORDER BY l.grade,l.exam_slot`).all()
-const byId = bank.prepare('SELECT data_json FROM questions WHERE id=?')
+ json_extract(l.data_json,'$.summary_ar') ar, json_extract(l.data_json,'$.type') examType,
+ json_extract(l.data_json,'$.book_pages_reference') bookPages, count(q.id) total
+ FROM learning_outcomes l JOIN questions q ON q.lo_id=l.id AND q.kind=json_extract(l.data_json,'$.type') GROUP BY l.id ORDER BY l.grade,l.exam_slot`).all()
+const byId = bank.prepare('SELECT data_json FROM questions WHERE id=? UNION ALL SELECT data_json FROM previous_questions WHERE id=?')
+const retired = new Set(bank.prepare('SELECT id FROM previous_questions').all().map(row=>row.id))
+const cardQuestions = bank.prepare(`SELECT q.data_json FROM questions q JOIN learning_outcomes l ON l.id=q.lo_id
+ WHERE l.id=? AND q.kind=json_extract(l.data_json,'$.type')
+ ORDER BY coalesce(json_extract(q.data_json,'$.base_id'),q.id)`)
 const imageById = bank.prepare('SELECT path FROM images WHERE id=?')
-const question = id => JSON.parse(byId.get(id)?.data_json ?? 'null')
+const question = id => JSON.parse(byId.get(id,id)?.data_json ?? 'null')
 const pictures = (q, role) => q.images.filter(i => i.role === role).map(i => i.asset_id)
 const figureLabels=new Map(bank.prepare(`SELECT i.id,i.page,s.name,
  json_extract(i.data_json,'$.display_en') en,json_extract(i.data_json,'$.display_ar') ar
@@ -18,7 +23,7 @@ const figureLabels=new Map(bank.prepare(`SELECT i.id,i.page,s.name,
 function figureNotes(q,role){
  return Object.fromEntries(pictures(q,role).map(id=>[id,figureLabels.get(id)]))
 }
-// Start with the existing core item, then rotate between response formats and figures.
+// Start with the existing core item, then rotate between illustrated and text questions.
 function practiceOrder(rows){
  const [first,...rest]=rows
  if(!first)return []
@@ -37,13 +42,13 @@ function practiceOrder(rows){
  return result
 }
 function prompt(q,allowGap=true) {
-  return { id:q.id, lo:q.lo_id, kind:q.kind, ar:q.question_ar, en:q.question_en, options:q.options, fields:fieldsFor(q,allowGap), images:pictures(q,'question'), figureNotes:figureNotes(q,'question'), stimulus:q.stimulus }
+  return { id:q.id, lo:q.lo_id, kind:q.kind, ar:q.question_ar, en:q.question_en, options:q.options, fields:q.kind==='FRQ'?fieldsFor(q,allowGap):[], images:pictures(q,'question'), figureNotes:figureNotes(q,'question'), stimulus:q.stimulus }
 }
 function solution(q, response) {
   const selected = q.options.find(o => o.key === response)
   const correct = q.options.find(o => o.key === q.answer)
   let advice = q.misconception_ar || ''
-  let adviceEn = feedbackEn[q.id] || ''
+  let adviceEn = feedbackEn[q.id] || (q.kind===q.original_kind && !q.revised_content ? feedbackEn[q.base_id] : '') || ''
   if (selected && correct && response !== q.answer) {
     const value = s => Number(s.replace(/−/g,'-').match(/^[+\-]?\d+(?:\.\d+)?/)?.[0] ?? NaN)
     const a = value(selected.en), b = value(correct.en)
@@ -99,10 +104,10 @@ export function physicsApi(db) {
     }
     if(!activeVisit.get(student, Date.now()) || !profile.get(student)?.school) return reply(403,{error:'انتهت جلسة التدريب. حدّث الصفحة وسجّل الدخول للمتابعة.'})
     if(req.method==='GET'){
-      if(path==='/api/progress') return reply(200,progress.all(student).map(r=>({...r,lo:question(r.question).lo_id})))
+      if(path==='/api/progress') return reply(200,progress.all(student).map(r=>({...r,lo:retired.has(r.question)?null:question(r.question)?.lo_id})))
       if(path==='/api/mock') return reply(200,mockView(getMock.get(student)))
       if(path.startsWith('/api/card/')){
-        return reply(200,practiceOrder(bank.prepare('SELECT data_json FROM questions WHERE lo_id=? ORDER BY id').all(path.slice(10)).map(r=>JSON.parse(r.data_json))).map(q=>prompt(q)))
+        return reply(200,practiceOrder(cardQuestions.all(path.slice(10)).map(r=>JSON.parse(r.data_json))).map(q=>prompt(q)))
       }
       if(path.startsWith('/api/figure/')){
         const [, , ,id,role,index]=path.split('/')
@@ -112,15 +117,15 @@ export function physicsApi(db) {
         const asset=q && (role==='question'||reviewed) && pictures(q,role)[Number(index)]
         if(!asset)return reply(404,{error:'الصورة غير متاحة'})
         const file=imageById.get(asset).path
-        res.writeHead(200,{'Content-Type':file.endsWith('.png')?'image/png':'image/jpeg','Cache-Control':'private,no-store'})
+        res.writeHead(200,{'Content-Type':file.endsWith('.svg')?'image/svg+xml':file.endsWith('.png')?'image/png':'image/jpeg','Cache-Control':'private,no-store'})
         return res.end(readFileSync(new URL('./bank/'+file,import.meta.url)))
       }
     }
     if(req.method==='POST' && path==='/api/mock/new' && [9,10,11,12].includes(body.grade)){
       const previous=mockView(getMock.get(student))
       if(previous && !previous.done) return reply(409,{error:'أكمل الاختبار الحالي أولاً'})
-      const pick=bank.prepare(`SELECT id,estimated_minutes FROM questions WHERE lo_id=? ORDER BY (kind=?) DESC,random() LIMIT 1`)
-      const rows=cards.filter(c=>c.grade===body.grade).map(c=>pick.get(c.id,c.slot<=16?'MCQ':'FRQ'))
+      const pick=bank.prepare(`SELECT id,estimated_minutes FROM questions WHERE lo_id=? AND kind=? ORDER BY random() LIMIT 1`)
+      const rows=cards.filter(c=>c.grade===body.grade).map(c=>pick.get(c.id,c.examType))
       const deadline=Date.now()+60000*rows.reduce((n,r)=>n+r.estimated_minutes,0)
       db.prepare('INSERT INTO physics_mocks VALUES(?,?,?,?,?,?,0)').run(randomUUID(),student,body.grade,JSON.stringify(rows.map(r=>r.id)),'{}',deadline)
       return reply(201,mockView(getMock.get(student)))

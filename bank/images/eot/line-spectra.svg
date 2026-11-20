@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 245" font-family="sans-serif" font-size="16" fill="#143e38">
+ <rect width="500" height="245" fill="#fffdf5"/>
+ <g fill="#15232d"><rect x="80" y="26" width="375" height="35" rx="4"/><rect x="80" y="77" width="375" height="35" rx="4"/><rect x="80" y="128" width="375" height="35" rx="4"/></g>
+ <g stroke-width="4"><path d="M142.5 30v27 M142.5 132v27" stroke="#8b83ff"/><path d="M267.5 30v27 M267.5 132v27" stroke="#a8e666"/><path d="M205 81v27 M205 132v27" stroke="#45d9d4"/><path d="M392.5 81v27 M392.5 132v27" stroke="#ff8565"/></g>
+ <text x="38" y="50">A</text><text x="38" y="101">B</text><text x="38" y="152">X</text>
+ <path d="M80 181h375 M80 181v6 M205 181v6 M330 181v6 M455 181v6" stroke="#183c37" fill="none"/>
+ <g text-anchor="middle"><text x="80" y="205">400</text><text x="205" y="205">500</text><text x="330" y="205">600</text><text x="455" y="205">700</text></g><text x="455" y="232" text-anchor="end">λ (nm)</text>
+</svg>

@@ -904,5 +904,408 @@
     "ar": "الميل",
     "value": 4.133333333333333e-15,
     "unit": "eV·s"
+  },
+  "EOT-G9A-20-03": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": 6.0,
+    "unit": "m/s²"
+  },
+  "EOT-G11A-18-02": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": 2.0,
+    "unit": ""
+  },
+  "EOT-SRC10-M096": {
+    "en": "Name of the line",
+    "ar": "اسم المستقيم",
+    "terms": [
+      "principal axis",
+      "optical axis",
+      "المحور الرئيس",
+      "المحور الرئيسي",
+      "المحور البصري"
+    ]
+  },
+  "EOT-SRC10-M097": {
+    "en": "Name of the point",
+    "ar": "اسم النقطة",
+    "terms": [
+      "virtual focus",
+      "focus",
+      "البؤرة الوهمية",
+      "البؤرة",
+      "البؤرة الافتراضية"
+    ]
+  },
+  "EOT-SRC10-M098": {
+    "en": "Direction relative to the axis",
+    "ar": "الاتجاه بالنسبة إلى المحور",
+    "terms": [
+      "parallel",
+      "parallel to the axis",
+      "parallel to the principal axis",
+      "مواز",
+      "موازي",
+      "مواز للمحور",
+      "موازيا للمحور"
+    ]
+  },
+  "EOT-SRC10-M099": {
+    "en": "Image location",
+    "ar": "موضع الصورة",
+    "terms": [
+      "between V and F",
+      "between F and V",
+      "between the vertex and the focus",
+      "بين V وF",
+      "بين البؤرة والرأس",
+      "بين الرأس والبؤرة"
+    ]
+  },
+  "EOT-SRC10-M100": {
+    "en": "Line style",
+    "ar": "نوع الخط",
+    "terms": [
+      "dashed",
+      "dotted",
+      "dashed lines",
+      "متقطع",
+      "متقطعة",
+      "خطوط متقطعة",
+      "منقط"
+    ]
+  },
+  "EOT-SRC10-M101": {
+    "en": "Beam behaviour",
+    "ar": "سلوك الحزمة",
+    "terms": [
+      "diverges",
+      "diverge",
+      "diverging",
+      "spreads out",
+      "تتباعد",
+      "يتباعد",
+      "متباعدة",
+      "تتفرق"
+    ]
+  },
+  "EOT-SRC10-M104": {
+    "en": "Mirror type",
+    "ar": "نوع المرآة",
+    "terms": [
+      "convex",
+      "convex mirror",
+      "محدبة",
+      "مرآة محدبة"
+    ]
+  },
+  "EOT-SRC10-M106": {
+    "en": "Mirror type",
+    "ar": "نوع المرآة",
+    "terms": [
+      "concave",
+      "concave mirror",
+      "مقعرة",
+      "مرآة مقعرة"
+    ]
+  },
+  "EOT-SRC10-M107": {
+    "en": "Refraction angle",
+    "ar": "زاوية الانكسار",
+    "value": 0.0,
+    "unit": "°"
+  },
+  "EOT-SRC10-M108": {
+    "en": "At entry, the ray bends ___ the normal.",
+    "ar": "عند الدخول ينحرف الشعاع ___ العمود.",
+    "terms": [
+      "toward",
+      "towards",
+      "toward the normal",
+      "نحو",
+      "باتجاه",
+      "مقتربا من"
+    ]
+  },
+  "EOT-SRC10-M109": {
+    "en": "Frequency after entry",
+    "ar": "التردد بعد الدخول",
+    "terms": [
+      "unchanged",
+      "constant",
+      "stays the same",
+      "ثابت",
+      "لا يتغير",
+      "يبقى ثابتا"
+    ]
+  },
+  "EOT-SRC10-M118": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": -2.0,
+    "unit": ""
+  },
+  "EOT-SRC10-M119": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": 0.4,
+    "unit": ""
+  },
+  "EOT-SRC10-M120": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": -3.0,
+    "unit": "cm"
+  },
+  "EOT-SRC10-M121": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": 0.4,
+    "unit": ""
+  },
+  "EOT-SRC10-M122": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": 30.0,
+    "unit": "cm"
+  },
+  "EOT-SRC10-M123": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": -8.0,
+    "unit": "cm"
+  },
+  "EOT-SRC10-M124": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": 12.0,
+    "unit": "cm"
+  },
+  "EOT-SRC10-M125": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": 12.0,
+    "unit": "cm"
+  },
+  "EOT-SRC10-M129": {
+    "en": "Central colour",
+    "ar": "لون المركز",
+    "terms": [
+      "white",
+      "white light",
+      "أبيض",
+      "ابيض",
+      "بيضاء"
+    ]
+  },
+  "EOT-SRC10-M130": {
+    "en": "Outer colour",
+    "ar": "اللون الأبعد",
+    "terms": [
+      "red",
+      "red light",
+      "أحمر",
+      "حمراء"
+    ]
+  },
+  "EOT-SRC10-M131": {
+    "en": "The coloured bands become harder to distinguish because they ___.",
+    "ar": "يصعب تمييز الأهداب الملونة لأنها ___.",
+    "terms": [
+      "overlap",
+      "overlap one another",
+      "تتراكب",
+      "تتداخل"
+    ]
+  },
+  "EOT-SRC10-M132": {
+    "en": "Meaning of d",
+    "ar": "معنى d",
+    "terms": [
+      "slit separation",
+      "distance between the slits",
+      "slit spacing",
+      "المسافة بين الشقين",
+      "تباعد الشقين",
+      "الفصل بين الشقين"
+    ]
+  },
+  "EOT-SRC10-M133": {
+    "en": "Distance from the centre",
+    "ar": "المسافة عن المركز",
+    "value": 4.0,
+    "unit": "mm"
+  },
+  "EOT-SRC10-M134": {
+    "en": "New distance",
+    "ar": "المسافة الجديدة",
+    "value": 4.0,
+    "unit": "mm"
+  },
+  "EOT-SRC10-M135": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": 3.0,
+    "unit": "mm"
+  },
+  "EOT-SRC10-M136": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": 12.0,
+    "unit": "mm"
+  },
+  "EOT-SRC10-M137": {
+    "en": "Fringe spacing",
+    "ar": "تباعد الأهداب",
+    "value": 3.0,
+    "unit": "mm"
+  },
+  "EOT-SRC10-M138": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": 0.3,
+    "unit": "mm"
+  },
+  "EOT-SRC10-M139": {
+    "en": "The central maximum is ___ than a side maximum.",
+    "ar": "العظمى المركزية ___ من العظمى الجانبية.",
+    "terms": [
+      "wider",
+      "broader",
+      "twice as wide",
+      "أعرض",
+      "أوسع",
+      "أكبر عرضا"
+    ]
+  },
+  "EOT-SRC10-M140": {
+    "en": "Colour",
+    "ar": "اللون",
+    "terms": [
+      "red",
+      "red light",
+      "أحمر",
+      "حمراء"
+    ]
+  },
+  "EOT-SRC10-M141": {
+    "en": "Central colour",
+    "ar": "لون المركز",
+    "terms": [
+      "white",
+      "white light",
+      "أبيض",
+      "بيضاء"
+    ]
+  },
+  "EOT-SRC10-M142": {
+    "en": "sin θ₁",
+    "ar": "sin θ₁",
+    "value": 0.25,
+    "unit": ""
+  },
+  "EOT-SRC10-M143": {
+    "en": "Full width",
+    "ar": "العرض الكامل",
+    "value": 6.0,
+    "unit": "mm"
+  },
+  "EOT-SRC10-M144": {
+    "en": "Slit width",
+    "ar": "عرض الشق",
+    "value": 0.25,
+    "unit": "mm"
+  },
+  "EOT-SRC10-M145": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": 9.0,
+    "unit": "mm"
+  },
+  "EOT-SRC10-M146": {
+    "en": "New width",
+    "ar": "العرض الجديد",
+    "value": 6.0,
+    "unit": "mm"
+  },
+  "EOT-SRC10-M147": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": 10.0,
+    "unit": "mm"
+  },
+  "EOT-SRC10-M148": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": 5.0,
+    "unit": "mm"
+  },
+  "EOT-SRC10-M152": {
+    "en": "sin θ₂",
+    "ar": "sin θ₂",
+    "value": 0.5,
+    "unit": ""
+  },
+  "EOT-SRC10-M153": {
+    "en": "Signed angle",
+    "ar": "الزاوية بإشارتها",
+    "value": -15.0,
+    "unit": "°"
+  },
+  "EOT-SRC10-M154": {
+    "en": "Order number",
+    "ar": "رقم الرتبة",
+    "value": 0.0,
+    "unit": ""
+  },
+  "EOT-SRC10-M155": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": 2e-06,
+    "unit": "m"
+  },
+  "EOT-SRC10-M156": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": 14.5,
+    "unit": "°"
+  },
+  "EOT-SRC10-M157": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": 3.0,
+    "unit": ""
+  },
+  "EOT-SRC10-M158": {
+    "en": "Calculated value",
+    "ar": "القيمة المحسوبة",
+    "value": 550.0,
+    "unit": "nm"
+  },
+  "EOT-G12A-EXT-014": {
+    "en": "Increase when frequency rises",
+    "ar": "الزيادة عند رفع التردد",
+    "value": 0.414,
+    "unit": "eV"
+  },
+  "EOT-VAR10-15": {
+    "en": "Direction relative to the normal",
+    "ar": "الاتجاه بالنسبة إلى العمود",
+    "terms": [
+      "toward the normal",
+      "towards the normal",
+      "closer to the normal",
+      "نحو العمود",
+      "تقترب من العمود",
+      "باتجاه العمود"
+    ]
+  },
+  "EOT-SRC10-V20": {
+    "en": "Resultant amplitude for zero phase difference (in the given units)",
+    "ar": "السعة المحصلة عند فرق طور صفري (بالوحدات المعطاة)",
+    "value": 4,
+    "unit": ""
   }
 }

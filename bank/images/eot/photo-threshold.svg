@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 266" font-family="sans-serif" font-size="16" fill="#143e38">
+ <rect width="500" height="266" fill="#fffdf5"/>
+ <text x="35" y="28">Kₘₐₓ (eV)</text>
+ <path d="M65 148H440 M65 82H440 M165 47V214 M265 47V214 M365 47V214" fill="none" stroke="#c9d8d0" stroke-dasharray="4 4"/>
+ <path d="M65 44V214H457" fill="none" stroke="#183c37" stroke-width="2"/>
+ <path d="M165 214L415 49" fill="none" stroke="#21796f" stroke-width="4"/>
+ <g fill="#aa5224"><circle cx="165" cy="214" r="5"/><circle cx="365" cy="82" r="5"/></g>
+ <g text-anchor="end"><text x="56" y="220">0</text><text x="56" y="87">0.83</text></g>
+ <g text-anchor="middle"><text x="65" y="236">4</text><text x="165" y="236">5</text><text x="265" y="236">6</text><text x="365" y="236">7</text></g>
+ <text x="456" y="256" text-anchor="end">f (10¹⁴ Hz)</text>
+</svg>
