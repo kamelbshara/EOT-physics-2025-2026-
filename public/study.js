@@ -1,6 +1,6 @@
 import {figures,measurements,writePhysicsText} from './question-paper.js'
 import { makeLawCard, makeExample } from './notebook.js'
-import { writtenEditor, hasResponse } from './math-input.js'
+import { writtenEditor, hasResponse, parseDraft } from './math-input.js'
 import { laws, relevantLaws } from './laws.js'
 import { lang, t, changeLanguage, applyLanguage, errorText } from './language.js'
 import { englishHint, englishGuides } from './english-support.js'
@@ -192,6 +192,7 @@ function lesson(){
  $('panelManual').disabled=$('examplesTab').disabled=inMock&&!mock.done
  const readonly=inMock&&mock.done
  function edit(value){
+  clearAnswerMarks()
   $('result').hidden=true
   if(inMock){
    const drafts=mockDrafts()
@@ -215,17 +216,69 @@ function lesson(){
  else if(!inMock&&draft?.checked){if(replies[q.id])showReview(q,replies[q.id],answer);else void guard(async()=>{const r=await api('record',{id:q.id,response:answer,check:true});if(items[index]===q&&!inMock&&cache[q.id]===draft){replies[q.id]=r;showReview(q,r,answer)}})()}
  tick()
 }
+function clearAnswerMarks(){
+ for(const mark of $('inputs').querySelectorAll('.answer-mark'))mark.remove()
+ for(const row of $('inputs').querySelectorAll('[data-verdict]'))delete row.dataset.verdict
+}
+function markAnswer(row,verdict,label){
+ if(!row)return
+ row.dataset.verdict=verdict
+ const mark=element('small',label)
+ mark.className='answer-mark'
+ row.append(mark)
+}
 function showReview(q,r,answer,studyOnly=false){
- const out=$('result');out.hidden=false
- const correct=q.kind==='MCQ' && answer===r.correct
- const states=r.coach?.parts||[]
- const title=q.kind==='MCQ' ? (correct?t('Correct answer','إجابة صحيحة'):t('Review your choice','راجع اختيارك')) :
-  r.coach?.exact?t('Your answer matches the model','تطابق إجابتك الحل النموذجي'):
-  states.length&&states.every(code=>code==='correct')?t('All short-answer checks passed','كل الإجابات القصيرة صحيحة'):t('Review your response','مراجعة إجابتك')
- out.replaceChildren(element('h3',studyOnly?t('Solution walkthrough','شرح الحل خطوة بخطوة'):title))
+ const out=$('result')
+ clearAnswerMarks()
+ const answered=!studyOnly && hasResponse(answer)
+ const selected=q.options.find(o=>o.key===answer)
+ const key=q.options.find(o=>o.key===r.correct)
+ const draft=parseDraft(answer)
+ const exact=r.coach?.exact && !draft.parts.some(part=>part?.value?.trim())
+ const states=answered && !exact ? r.coach?.parts||[] : []
+ const partLabels={
+  correct:t('Correct','صحيح'),incorrect:t('Incorrect','خطأ'),
+  empty:t('Unanswered','دون إجابة'),review:t('Review','للمراجعة')
+ }
+ function partVerdict(code,i){
+  if(code==='correct' || code==='empty')return code
+  if(code==='expression' || (code==='term' && !draft.parts[i]?.value))return 'review'
+  return 'incorrect'
+ }
+ let verdict='review',title=t('Compare your response with the model','قارن إجابتك بالحل النموذجي')
+ if(studyOnly)title=t('Solution walkthrough','شرح الحل خطوة بخطوة')
+ else if(!answered)title=t('Unanswered','دون إجابة')
+ else if(q.kind==='MCQ'){
+  verdict=selected?.key===r.correct?'correct':'incorrect'
+  title=verdict==='correct'?t('Correct answer','إجابة صحيحة'):t('Incorrect answer','إجابة خاطئة')
+  for(const radio of $('inputs').querySelectorAll('input[type=radio]')){
+   if(radio.value===r.correct)markAnswer(radio.parentElement,'correct',t('Correct answer','الإجابة الصحيحة'))
+   else if(radio.value===answer)markAnswer(radio.parentElement,'incorrect',t('Incorrect choice','اختيار خاطئ'))
+  }
+ }else if(exact || (states.length && states.every(code=>code==='correct'))){
+  verdict='correct'
+  title=exact?t('Your answer matches the model','إجابتك تطابق الحل النموذجي'):t('All short answers are correct','كل الإجابات القصيرة صحيحة')
+ }else if(states.some((code,i)=>partVerdict(code,i)==='incorrect')){
+  verdict='incorrect'
+  title=states.length===1?t('Incorrect short answer','إجابة قصيرة خاطئة'):t('Check the highlighted answers','راجع الإجابات المحددة')
+ }else if(states.includes('empty'))title=t('Response incomplete','الإجابة غير مكتملة')
+ out.dataset.verdict=verdict
+ out.hidden=false
+ out.replaceChildren(element('h3',title))
  const step=(heading,body)=>{
   const block=element('section');block.className='coach-step'
-  block.append(element('h4',heading),element('p',body));out.append(block)
+  const p=element('p');writePhysicsText(p,body)
+  block.append(element('h4',heading),p);out.append(block)
+ }
+ const sentences=r[lang()].split(/(?<=[.!?؟؛])\s+|\n+|(?=\([b-d]\)\s)/i).map(v=>v.trim()).filter(Boolean)
+ const explanatory=sentences.filter(v=>/because|since |therefore|conserv|proportional|correspond|depends|slope|area|direction|constant|produces|indicates|لأن|بسبب|بما أن|ميل|مساحة|يتناسب|ثبات|حفظ|اتجاه|يدل|يعني/i.test(v))
+ if(answered){
+  if(verdict==='incorrect' && selected && key)step(t('Correct choice','الاختيار الصحيح'),key.key+' · '+key[lang()])
+  if(verdict==='incorrect' && t(r.adviceEn,r.advice)){
+   step(t('What to check','ما الذي تراجعه؟'),t(r.adviceEn,r.advice))
+  }
+  const explanation=q.kind==='MCQ' ? r[lang()] : explanatory[0] || sentences[0]
+  step(t('Answer explained','تفسير الإجابة'),explanation)
  }
  const messages={
   correct:t('Correct.','صحيح.'), empty:t('Still blank.','الحقل فارغ.'),
@@ -235,23 +288,21 @@ function showReview(q,r,answer,studyOnly=false){
   retry:t('Recheck the relation and substitution.','راجع العلاقة والتعويض.'),
   term:t('Compare your term with the definition. Other wording can be reviewed against the model.','قارن مصطلحك بالتعريف. راجع الصياغات البديلة مع الحل النموذجي.')
  }
- if(!studyOnly && states.length)states.forEach((code,i)=>step(q.fields[i]?.[lang()]||String(i+1),messages[code]))
- if(q.kind==='MCQ' && !correct){
-  const selected=q.options.find(o=>o.key===answer)
-  if(selected)step(t('Your choice','اختيارك'),selected[lang()])
- }
- if(!studyOnly && q.kind==='FRQ' && !r.coach?.exact && !states.length)out.append(element('p',t('Compare your answer with the reasoning below. Written explanations and diagrams are reviewed against the worked solution.','قارن جوابك بالتسلسل أدناه. تُراجع التفسيرات والرسومات بالمقارنة مع الحل النموذجي.')))
+ const lines=$('inputs').querySelectorAll('.answer-line')
+ states.forEach((code,i)=>{
+  const state=partVerdict(code,i)
+  markAnswer(lines[i],state,partLabels[state])
+  step(q.fields[i]?.[lang()]||t('Answer ','الإجابة ')+(i+1),messages[code])
+ })
  step(t('1 · Identify the idea','١ · حدّد الفكرة'),t(englishHint(q.lo),support(q.lo).hint))
  for(const law of relevantLaws(q.lo)){
   step(t('Principle · ','المبدأ · ')+t(law[2],law[3]),t(law[5],law[6]))
  }
- const sentences=r[lang()].split(/(?<=[.!?؟؛])\s+|\n+|(?=\([b-d]\)\s)/i).map(v=>v.trim()).filter(Boolean)
- const explanatory=sentences.filter(v=>/because|since |therefore|conserv|proportional|correspond|depends|slope|area|direction|constant|produces|indicates|لأن|بسبب|بما أن|ميل|مساحة|يتناسب|ثبات|حفظ|اتجاه|يدل|يعني/i.test(v))
- if(sentences.length>1 && explanatory.length){
+ if(!answered && sentences.length>1 && explanatory.length){
   const reasoning=explanatory.find(v=>v!==sentences.at(-1)) || explanatory[0]
   step(t('Apply it to this question','تطبيق الفكرة على السؤال'),reasoning)
  }
- if(r.advice)step(t('Check your reasoning','راجع الفكرة'),t(r.adviceEn||englishHint(q.lo),r.advice))
+ if(!answered && r.advice)step(t('Check your reasoning','راجع الفكرة'),t(r.adviceEn||englishHint(q.lo),r.advice))
  const ideal=element('section');ideal.className='ideal';ideal.hidden=true
  ideal.append(element('h3',t('Worked solution','الحل النموذجي')))
  if(q.kind==='MCQ')ideal.append(element('strong',q.options.find(o=>o.key===r.correct)?.[lang()]))
