@@ -12,8 +12,32 @@ const byId = bank.prepare('SELECT data_json FROM questions WHERE id=?')
 const imageById = bank.prepare('SELECT path FROM images WHERE id=?')
 const question = id => JSON.parse(byId.get(id)?.data_json ?? 'null')
 const pictures = (q, role) => q.images.filter(i => i.role === role).map(i => i.asset_id)
+const figureLabels=new Map(bank.prepare(`SELECT i.id,i.page,s.name,
+ json_extract(i.data_json,'$.display_en') en,json_extract(i.data_json,'$.display_ar') ar
+ FROM images i JOIN sources s ON s.id=i.source_id`).all().map(({id,...label})=>[id,label]))
+function figureNotes(q,role){
+ return Object.fromEntries(pictures(q,role).map(id=>[id,figureLabels.get(id)]))
+}
+// Start with the existing core item, then rotate between response formats and figures.
+function practiceOrder(rows){
+ const [first,...rest]=rows
+ if(!first)return []
+ const result=[first]
+ const variant=rest.findIndex(q=>q.origin==='original_practice_variant')
+ if(variant>=0)result.push(...rest.splice(variant,1))
+ const groups=new Map()
+ for(const q of rest){
+  const type=q.kind+(q.has_question_image?'-figure':'-text')
+  if(!groups.has(type))groups.set(type,[])
+  groups.get(type).push(q)
+ }
+ for(let i=0;result.length<rows.length;i++){
+  for(const group of groups.values())if(group[i])result.push(group[i])
+ }
+ return result
+}
 function prompt(q,allowGap=true) {
-  return { id:q.id, lo:q.lo_id, kind:q.kind, ar:q.question_ar, en:q.question_en, options:q.options, fields:fieldsFor(q,allowGap), images:pictures(q,'question') }
+  return { id:q.id, lo:q.lo_id, kind:q.kind, ar:q.question_ar, en:q.question_en, options:q.options, fields:fieldsFor(q,allowGap), images:pictures(q,'question'), figureNotes:figureNotes(q,'question'), stimulus:q.stimulus }
 }
 function solution(q, response) {
   const selected = q.options.find(o => o.key === response)
@@ -31,7 +55,7 @@ function solution(q, response) {
       advice = 'راجع بادئات الوحدات واكتب عامل التحويل قبل التعويض.'
     }
   }
-  return { correct:correct?.key, ar:q.solution_ar, en:q.solution_en, advice, adviceEn, coach:q.kind==='FRQ'?coach(q,response):null, images:pictures(q,'solution') }
+  return { correct:correct?.key, ar:q.solution_ar, en:q.solution_en, advice, adviceEn, coach:q.kind==='FRQ'?coach(q,response):null, images:pictures(q,'solution'), figureNotes:figureNotes(q,'solution') }
 }
 
 export function physicsApi(db) {
@@ -78,7 +102,7 @@ export function physicsApi(db) {
       if(path==='/api/progress') return reply(200,progress.all(student).map(r=>({...r,lo:question(r.question).lo_id})))
       if(path==='/api/mock') return reply(200,mockView(getMock.get(student)))
       if(path.startsWith('/api/card/')){
-        return reply(200,bank.prepare('SELECT data_json FROM questions WHERE lo_id=? ORDER BY id').all(path.slice(10)).map(r=>prompt(JSON.parse(r.data_json))))
+        return reply(200,practiceOrder(bank.prepare('SELECT data_json FROM questions WHERE lo_id=? ORDER BY id').all(path.slice(10)).map(r=>JSON.parse(r.data_json))).map(q=>prompt(q)))
       }
       if(path.startsWith('/api/figure/')){
         const [, , ,id,role,index]=path.split('/')

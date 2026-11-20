@@ -1,3 +1,4 @@
+import {writePhysicsText} from './question-paper.js'
 import {lang,t} from './language.js'
 import {laws,relevantLaws} from './laws.js'
 import {plateCaptions} from './plates.js'
@@ -8,17 +9,7 @@ import sourceFigures from './worked/source-figures.js'
 function el(tag,text){
  const node=document.createElement(tag)
  if(text!==undefined){
-  // Keep mixed numbers, units and equations in reading order inside Arabic prose.
-  if(lang()==='ar' && /[\u0600-\u06FF]/u.test(text)){
-   const runs=text.split(/([\p{Script=Latin}\p{Script=Greek}\p{N}\p{Sm}ℏ(][\p{Script=Latin}\p{Script=Greek}\p{N}\p{Sm}ℏ·×÷^_*\/.()%°:| −-]*)/gu)
-   for(const [i,run] of runs.entries()){
-    if(i%2===0){node.append(run);continue}
-    const isolated=document.createElement('bdi')
-    isolated.dir='ltr'
-    isolated.textContent=run.trimEnd()
-    node.append(isolated,run.slice(isolated.textContent.length))
-   }
-  }else node.textContent=text
+  writePhysicsText(node,text)
  }
  return node
 }
@@ -86,7 +77,8 @@ function sourceExample(card,source,api,figures){
    const category=source.source==='old9a'?t('Past exam figure','رسم من اختبار سابق'):t('Practice booklet figure','رسم من كتيّب تدريبي')
    body.replaceChildren(el('h3',q[lang()]))
    const images=figures(q,'question',q.images)
-   body.append(...images,el('small',category+' · '+source.name+t(' · PDF page ',' · صفحة PDF ')+source.page))
+   body.append(...images)
+   if(!q.figureNotes)body.append(el('small',category+' · '+source.name+t(' · PDF page ',' · صفحة PDF ')+source.page))
    if(q.options.length){
     const choices=el('ul')
     for(const option of q.options)choices.append(el('li',option.key+' · '+option[lang()]))
@@ -94,7 +86,7 @@ function sourceExample(card,source,api,figures){
    }
    const steps=review[lang()].split(/(?<=[.!?؟])\s+|[؛;]\s*|\n+/u).map(s=>s.trim()).filter(Boolean)
    const answer=walkthrough(steps)
-   answer.append(...figures(q,'solution',review.images))
+   answer.append(...figures(q,'solution',review.images,review.figureNotes))
    body.append(strategy(t(englishHint(card.id),support(card.id).hint)),answer)
   }catch{
    loaded=false

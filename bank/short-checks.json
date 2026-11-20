@@ -832,5 +832,77 @@
       "الكتلة الأصغر",
       "الأخف"
     ]
+  },
+  "VAR9-19": {
+    "en": "Distance from the starting point",
+    "ar": "البعد عن نقطة البداية",
+    "value": 3.0,
+    "unit": "m"
+  },
+  "VAR9-20": {
+    "en": "Displacement",
+    "ar": "الإزاحة",
+    "value": 6.0,
+    "unit": "m"
+  },
+  "VAR9-07": {
+    "en": "Travel time",
+    "ar": "زمن الرحلة",
+    "value": 4.0,
+    "unit": "h"
+  },
+  "VAR10-02": {
+    "en": "Distance moved by the person",
+    "ar": "المسافة التي تحرّكها الشخص",
+    "value": 0.4,
+    "unit": "m"
+  },
+  "VAR10-10": {
+    "en": "Signed image distance",
+    "ar": "بُعد الصورة بإشارته",
+    "value": -6.0,
+    "unit": "cm"
+  },
+  "VAR10-20": {
+    "en": "Full central width",
+    "ar": "العرض الكامل للهدب المركزي",
+    "value": 6.4,
+    "unit": "mm"
+  },
+  "VAR11-07": {
+    "en": "Inertia ratio",
+    "ar": "نسبة عزمي القصور",
+    "value": 2.0,
+    "unit": ""
+  },
+  "VAR11-19": {
+    "en": "Final velocity",
+    "ar": "السرعة المتجهة النهائية",
+    "value": 2.5,
+    "unit": "m/s"
+  },
+  "VAR11-20": {
+    "en": "Impulse on D",
+    "ar": "الدفع على الكرة D",
+    "value": 0.36,
+    "unit": "N·s"
+  },
+  "VAR12-17": {
+    "en": "Kinetic energy at B",
+    "ar": "طاقة الحركة عند B",
+    "value": 240.0,
+    "unit": "J"
+  },
+  "VAR12-02": {
+    "en": "Energy ratio B/A",
+    "ar": "نسبة الطاقة B/A",
+    "value": 4.0,
+    "unit": ""
+  },
+  "VAR12-19": {
+    "en": "Slope",
+    "ar": "الميل",
+    "value": 4.133333333333333e-15,
+    "unit": "eV·s"
   }
 }

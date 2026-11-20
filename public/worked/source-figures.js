@@ -13,6 +13,13 @@ export default {
       "source": "practice10",
       "page": 40,
       "name": "Grade_10_ADV_Physics_Term_1_EOT_based_Exam_Booklet_Ms_Sreeja.pdf"
+    },
+    {
+      "id": "VAR10-01",
+      "asset": "practice10-x256",
+      "source": "practice10",
+      "page": 42,
+      "name": "Grade_10_ADV_Physics_Term_1_EOT_based_Exam_Booklet_Ms_Sreeja.pdf"
     }
   ],
   "G10A-Q02": [
@@ -25,6 +32,13 @@ export default {
     },
     {
       "id": "SRC10-V04",
+      "asset": "practice10-x172",
+      "source": "practice10",
+      "page": 16,
+      "name": "Grade_10_ADV_Physics_Term_1_EOT_based_Exam_Booklet_Ms_Sreeja.pdf"
+    },
+    {
+      "id": "VAR10-02",
       "asset": "practice10-x172",
       "source": "practice10",
       "page": 16,
@@ -100,6 +114,13 @@ export default {
       "source": "practice10",
       "page": 52,
       "name": "Grade_10_ADV_Physics_Term_1_EOT_based_Exam_Booklet_Ms_Sreeja.pdf"
+    },
+    {
+      "id": "VAR10-07",
+      "asset": "practice10-x203",
+      "source": "practice10",
+      "page": 52,
+      "name": "Grade_10_ADV_Physics_Term_1_EOT_based_Exam_Booklet_Ms_Sreeja.pdf"
     }
   ],
   "G10A-Q08": [
@@ -127,6 +148,13 @@ export default {
       "source": "practice10",
       "page": 53,
       "name": "Grade_10_ADV_Physics_Term_1_EOT_based_Exam_Booklet_Ms_Sreeja.pdf"
+    },
+    {
+      "id": "VAR10-10",
+      "asset": "practice10-x217",
+      "source": "practice10",
+      "page": 53,
+      "name": "Grade_10_ADV_Physics_Term_1_EOT_based_Exam_Booklet_Ms_Sreeja.pdf"
     }
   ],
   "G10A-Q11": [
@@ -139,13 +167,6 @@ export default {
     }
   ],
   "G10A-Q12": [
-    {
-      "id": "SRC10-V18",
-      "asset": "practice10-x223",
-      "source": "practice10",
-      "page": 30,
-      "name": "Grade_10_ADV_Physics_Term_1_EOT_based_Exam_Booklet_Ms_Sreeja.pdf"
-    },
     {
       "id": "SRC10-V19",
       "asset": "practice10-x223",
@@ -189,6 +210,13 @@ export default {
   "G10A-Q15": [
     {
       "id": "SRC10-V25",
+      "asset": "practice10-x244",
+      "source": "practice10",
+      "page": 65,
+      "name": "Grade_10_ADV_Physics_Term_1_EOT_based_Exam_Booklet_Ms_Sreeja.pdf"
+    },
+    {
+      "id": "VAR10-15",
       "asset": "practice10-x244",
       "source": "practice10",
       "page": 65,
@@ -265,13 +293,6 @@ export default {
   "G10A-Q18": [
     {
       "id": "SRC10-V34",
-      "asset": "practice10-x272",
-      "source": "practice10",
-      "page": 49,
-      "name": "Grade_10_ADV_Physics_Term_1_EOT_based_Exam_Booklet_Ms_Sreeja.pdf"
-    },
-    {
-      "id": "SRC10-V35",
       "asset": "practice10-x272",
       "source": "practice10",
       "page": 49,
@@ -378,6 +399,13 @@ export default {
       "source": "practice10",
       "page": 67,
       "name": "Grade_10_ADV_Physics_Term_1_EOT_based_Exam_Booklet_Ms_Sreeja.pdf"
+    },
+    {
+      "id": "VAR10-20",
+      "asset": "practice10-x301",
+      "source": "practice10",
+      "page": 62,
+      "name": "Grade_10_ADV_Physics_Term_1_EOT_based_Exam_Booklet_Ms_Sreeja.pdf"
     }
   ],
   "G9A-Q08": [
@@ -392,6 +420,13 @@ export default {
   "G9A-Q10": [
     {
       "id": "G9A-EXT-025",
+      "asset": "g9-legacy-bus",
+      "source": "old9a",
+      "page": 19,
+      "name": "2021-2022 9 adv exam.pdf"
+    },
+    {
+      "id": "VAR9-10",
       "asset": "g9-legacy-bus",
       "source": "old9a",
       "page": 19,
@@ -411,6 +446,13 @@ export default {
       "asset": "g9-legacy-vcurve",
       "source": "old9a",
       "page": 10,
+      "name": "2021-2022 9 adv exam.pdf"
+    },
+    {
+      "id": "VAR9-13",
+      "asset": "g9-legacy-reversal",
+      "source": "old9a",
+      "page": 2,
       "name": "2021-2022 9 adv exam.pdf"
     }
   ],
@@ -445,6 +487,13 @@ export default {
     },
     {
       "id": "G9A-EXT-078",
+      "asset": "g9-legacy-position",
+      "source": "old9a",
+      "page": 18,
+      "name": "2021-2022 9 adv exam.pdf"
+    },
+    {
+      "id": "VAR9-19",
       "asset": "g9-legacy-position",
       "source": "old9a",
       "page": 18,

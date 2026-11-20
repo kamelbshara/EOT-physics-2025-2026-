@@ -21,11 +21,12 @@ jobs:
           API: ${{ vars.PHYSICS_API_ORIGIN || 'https://physics-api-production.up.railway.app' }}
         run: |
           for attempt in {1..30}; do
-            curl -fsSL "$SITE/?v=$GITHUB_SHA" -o /tmp/physics-index && grep -Fq 'id="examplesTab"' /tmp/physics-index && break
+            curl -fsSL "$SITE/?v=$GITHUB_SHA" -o /tmp/physics-index && grep -Fq 'id="figureViewer"' /tmp/physics-index && break
             sleep 5
           done
           grep -Fq '<html lang="en" dir="ltr">' /tmp/physics-index
           grep -Fq 'id="school"' /tmp/physics-index
+          grep -Fq 'id="figureViewer"' /tmp/physics-index
           grep -Fq 'id="lawsTab"' /tmp/physics-index
           grep -Fq 'id="examplesTab"' /tmp/physics-index
           curl -fsSL --retry 3 "$SITE/worked/grade-12.js" -o /tmp/worked-12.js
@@ -37,9 +38,12 @@ jobs:
           grep -Fq 'الهيكل 100 مع استاذ احمد غرايبة' /tmp/physics-index
           curl -fsSL --retry 3 "$SITE/api-config.js" | grep -F "$API"
           curl -fsSL --retry 3 "$SITE/vendor/fx991ce/src/index.html" | grep -F 'fx-991CE X'
-          curl -fsS --retry 3 -H 'Origin: https://kamelbshara.github.io' -D /tmp/physics-headers "$API/api/catalog" -o /tmp/physics-catalog
+          for attempt in {1..36}; do
+            curl -fsS --retry 1 -H 'Origin: https://kamelbshara.github.io' -D /tmp/physics-headers "$API/api/catalog" -o /tmp/physics-catalog && jq -e '([.cards[].total] | add) == 675' /tmp/physics-catalog && break
+            sleep 5
+          done
           grep -iq '^access-control-allow-origin: https://kamelbshara.github.io' /tmp/physics-headers
-          jq -e '(.cards | length) == 80' /tmp/physics-catalog
+          jq -e '(.cards | length) == 80 and ([.cards[].total] | add) == 675' /tmp/physics-catalog
   publish:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
