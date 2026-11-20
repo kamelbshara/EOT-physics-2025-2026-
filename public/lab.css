@@ -52,3 +52,10 @@ body.student-design:has(.bookmarks:not([hidden])){padding-inline-end:76px}
 #inputs .answer-mark{font-weight:700;color:var(--mark-ink,#37484c)}
 #inputs .answer-line .answer-mark{grid-column:1/-1}
 #inputs label[data-verdict] input[type=radio]{accent-color:var(--mark-ink)}
+
+#lawSource{margin-block:0 1.2rem;color:#435d52;line-height:1.6}
+#lawSource a{color:#185a49;text-underline-offset:3px}
+.book-equation{margin:0;padding:10px 12px;border:1px solid #d9e5d9;border-radius:8px;background:#fff}
+.book-equation img{display:block;max-width:100%;width:auto;height:auto;max-height:70px;margin:0 auto 8px}
+.book-equation figcaption{font-size:.85rem;color:#344d40}
+.book-diagram img{object-fit:contain;background:#fff;max-height:230px}
