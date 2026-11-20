@@ -1,3 +1,4 @@
+import {figures,measurements,writePhysicsText} from './question-paper.js'
 import { makeLawCard, makeExample } from './notebook.js'
 import { writtenEditor, hasResponse } from './math-input.js'
 import { laws, relevantLaws } from './laws.js'
@@ -136,9 +137,6 @@ function openMock(){inMock=true;items=mock.questions;current=null;index=0;lesson
 $('resumeMock').onclick=()=>openMock()
 $('mockStart').onclick=guard(async()=>{if(!mock||mock.done)mock=await api('mock/new',{grade});openMock()})
 $('back').onclick=()=>dashboard()
-function figures(q,role,ids){
- return ids.map((id,i)=>{const img=element('img');img.crossOrigin='use-credentials';img.src=apiOrigin+'/api/figure/'+q.id+'/'+role+'/'+i;img.alt=(role==='question'?t('Question figure ','رسم السؤال '):t('Solution figure ','رسم الحل '))+(i+1);return img})
-}
 function lesson(){
  const q=items[index],draft=cache[q.id],answer=inMock?mock.answers[q.id]:draft?.response
  $('notice').textContent='';$('dashboard').hidden=true;$('lesson').hidden=false
@@ -147,7 +145,17 @@ function lesson(){
  $('title').textContent=inMock?(mock.done?t('Mock review · ','مراجعة الاختبار · ')+auto.filter(i=>mock.answers[i.id]===i.review.correct).length+'/'+auto.length+t(' multiple choice',' اختيار من متعدد'):t('Mock exam','اختبار الهيكل')):current[lang()]
  $('nav').replaceChildren(...items.map((v,n)=>{const b=button(n+1,()=>{index=n;lesson()});b.setAttribute('aria-pressed',n===index);b.classList.toggle('chip-done',inMock?!!mock.answers[v.id]:!!cache[v.id]?.checked);return b}))
  $('meta').textContent=(q.kind==='MCQ'?t('Multiple choice','اختيار من متعدد'):t('Written response','إجابة مكتوبة'))+' · '+(index+1)+' / '+items.length
- $('wm').innerHTML=questionWatermark();$('stem').textContent=q[lang()];$('altLang').textContent=t('العربية','English');$('english').lang=t('ar','en');$('english').dir=t('rtl','ltr');$('english').textContent=q[t('ar','en')];$('images').replaceChildren(...figures(q,'question',q.images))
+ $('wm').innerHTML=questionWatermark()
+ const alternate=t('ar','en')
+ writePhysicsText($('stem'),(q.stimulus||q)[lang()])
+ $('altLang').textContent=t('العربية','English')
+ $('english').lang=alternate
+ $('english').dir=t('rtl','ltr')
+ writePhysicsText($('english'),q[alternate],alternate)
+ const visuals=figures(q,'question',q.images)
+ if(q.stimulus)visuals.push(measurements(q.stimulus))
+ $('images').replaceChildren(...visuals)
+ $('questionLayout').classList.toggle('illustrated',visuals.length>0)
  const inputs=$('inputs');inputs.replaceChildren()
  $('panelManual').disabled=$('examplesTab').disabled=inMock&&!mock.done
  const readonly=inMock&&mock.done
@@ -166,7 +174,7 @@ function lesson(){
  }
  if(q.kind==='MCQ')for(const opt of q.options){
   const label=element('label'),radio=element('input');radio.type='radio';radio.name='answer';radio.value=opt.key;radio.checked=answer===opt.key;radio.disabled=readonly;radio.onchange=()=>edit(opt.key)
-  const desc=element('span',opt.key+' · '+opt[lang()]);desc.title=opt[t('ar','en')];label.append(radio,desc);inputs.append(label)
+  const desc=element('span');writePhysicsText(desc,opt.key+' · '+opt[lang()]);desc.title=opt[t('ar','en')];label.append(radio,desc);inputs.append(label)
  }else writtenEditor(inputs,q,answer,readonly,edit)
  $('hintText').hidden=true;$('result').hidden=true;$('walkthrough').hidden=inMock;$('manual').hidden=inMock&&!mock.done;$('hint').hidden=inMock&&!mock.done
  $('check').hidden=readonly;$('check').textContent=inMock?t('Finish mock','إنهاء الاختبار'):q.kind==='FRQ'?t('Check response','افحص الإجابة'):t('Check answer','تحقق من الإجابة')
@@ -217,7 +225,7 @@ function showReview(q,r,answer,studyOnly=false){
  if(q.kind==='MCQ')ideal.append(element('strong',q.options.find(o=>o.key===r.correct)?.[lang()]))
  const list=element('ol')
  for(const line of sentences)list.append(element('li',line))
- ideal.append(list,...figures(q,'solution',r.images))
+ ideal.append(list,...figures(q,'solution',r.images,r.figureNotes))
  const toggle=button('',()=>{ideal.hidden=!ideal.hidden;labelToggle()})
  function labelToggle(){toggle.textContent=ideal.hidden?t('Show full worked solution','إظهار الحل النموذجي الكامل'):t('Hide worked solution','إخفاء الحل النموذجي');toggle.setAttribute('aria-expanded',!ideal.hidden)}
  labelToggle();out.append(toggle,ideal)
