@@ -124,6 +124,7 @@ $('lawGrade').onchange=renderLaws
 function dashboard(){
  items=[];$('studyTabs').hidden=false;$('panelManual').disabled=$('examplesTab').disabled=false;opened++;inMock=false;$('lesson').hidden=true;$('dashboard').hidden=false;$('notice').textContent=''
  $('gradeTabs').replaceChildren(...[9,10,11,12].map(n=>{const b=button(t('Grade ','الصف ')+n,()=>{grade=n;dashboard()});b.setAttribute('aria-pressed',n===grade);return b}))
+ $('outcomesLink').hash='grade-'+grade
  const group=cards.filter(c=>c.grade===grade);$('gradeTitle').textContent=t('Grade '+grade+' Advanced · '+group.length+' outcomes','الصف '+grade+' المتقدم · '+group.length+' مؤشراً')
  $('cards').replaceChildren(...group.map(c=>{
    const b=button('',async()=>{const mark=++opened;const list=await api('card/'+c.id);if(mark!==opened)return;current=c;items=list;inMock=false;index=items.findIndex(q=>!cache[q.id]?.checked);index=Math.max(0,index);lesson()})

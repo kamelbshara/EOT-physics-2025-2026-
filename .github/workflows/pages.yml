@@ -21,11 +21,16 @@ jobs:
           API: ${{ vars.PHYSICS_API_ORIGIN || 'https://physics-api-production.up.railway.app' }}
         run: |
           for attempt in {1..30}; do
-            curl -fsSL "$SITE/?v=$GITHUB_SHA" -o /tmp/physics-index && grep -Fq 'id="figureViewer"' /tmp/physics-index && break
+            curl -fsSL "$SITE/?v=$GITHUB_SHA" -o /tmp/physics-index && grep -Fq 'id="outcomesLink"' /tmp/physics-index && break
             sleep 5
           done
           grep -Fq '<html lang="en" dir="ltr">' /tmp/physics-index
           grep -Fq 'id="school"' /tmp/physics-index
+          grep -Fq 'id="outcomesLink"' /tmp/physics-index
+          curl -fsSL --retry 3 "$SITE/outcomes.html" -o /tmp/physics-outcomes
+          for grade in 9 10 11 12; do
+            test "$(grep -c "<li id=\"g${grade}-q" /tmp/physics-outcomes)" -eq 20
+          done
           grep -Fq 'id="figureViewer"' /tmp/physics-index
           grep -Fq 'id="lawsTab"' /tmp/physics-index
           grep -Fq 'id="examplesTab"' /tmp/physics-index
