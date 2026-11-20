@@ -19,7 +19,7 @@ export function applyLanguage() {
     el.textContent=t('العربية','English')
     el.lang=t('ar','en')
   }
-  const labels={gradeTabs:t('Grade','الصف'), 'calculator-close':t('Close','إغلاق'), 'calculator-dock-left':t('Dock left','تثبيت يسارًا'), 'calculator-dock-right':t('Dock right','تثبيت يمينًا')}
+  const labels={studyTabs:t('Study bookmarks','علامات المراجعة'), examplesTab:t('Solution guide','دليل الحل'), lawsTab:t('Physics law sheet','ورقة قوانين الفيزياء'),gradeTabs:t('Grade','الصف'), 'calculator-close':t('Close','إغلاق'), 'calculator-dock-left':t('Dock left','تثبيت يسارًا'), 'calculator-dock-right':t('Dock right','تثبيت يمينًا')}
   for(const [id,label] of Object.entries(labels))document.getElementById(id).setAttribute('aria-label',label)
   const cover=document.querySelector('.shield-cover')
   if(cover){

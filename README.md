@@ -1,6 +1,6 @@
 # الهيكل 100 مع استاذ احمد غرايبة
 
-English-first, bilingual Advanced Physics final exam practice for Grades 9–12. Open a grade, select an exam coverage card, and practise with hints, figures, worked answers and an embedded ClassWiz calculator. The timed mock selects one item per blueprint row. MCQs are scored automatically. All 369 written items offer short-answer checkpoints in practice. Students can use MathLive for LaTeX, choose compatible units, or type a short term. Feedback checks individual entries and explains the relevant principles before an explicit worked-solution reveal. Open-ended reasoning and diagrams remain available for model comparison. The Physics laws tab groups equations and their conditions by grade.
+English-first, bilingual Advanced Physics final exam practice for Grades 9–12. Open a grade, select an exam coverage card, and practise with hints, figures, worked answers and an embedded ClassWiz calculator. The timed mock selects one item per blueprint row. MCQs are scored automatically. All 369 written items offer short-answer checkpoints in practice. Students can use MathLive for LaTeX, choose compatible units, or type a short term. Feedback checks individual entries and explains the relevant principles before an explicit worked-solution reveal. Open-ended reasoning and diagrams remain available for model comparison. Three side bookmarks open the ClassWiz calculator and its illustrated manual, a solution guide for the selected outcome, and a law sheet with 30 diagrams. Each of the 80 outcomes has an original bilingual example with a strategy and reasoned steps. Selected guides also include a second example with a credited figure from a prior exam or practice booklet.
 
 ## Running the app
 
@@ -10,7 +10,7 @@ The supplied SQLite bank is read-only in `bank/physics.sqlite`. `PHYSICS_DB` can
 
 The math app's Arabic fonts, colour palette, student watermarks, content shield and vendored calculator are included. Browser copy, printing and focus protections deter casual copying. Operating-system screen captures are still possible. The calculator manual uses screenshots from the embedded fx-991CE X emulator and independent numerical examples. Source notices are in public/vendor and public/fonts.
 
-See BANK_REVIEW.md for scope and coverage.
+See [the bank review](BANK_REVIEW.md) and [the per-outcome coverage and worked-example audit in Arabic](KPI_COVERAGE_AR.md).
 
 A student check-in expires after 24 hours. Returning students check in again on the same browser to continue their saved work. The app serves a read-only bank and has no web-based administrative editing endpoints.
 

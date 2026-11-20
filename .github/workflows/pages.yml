@@ -21,12 +21,17 @@ jobs:
           API: ${{ vars.PHYSICS_API_ORIGIN || 'https://physics-api-production.up.railway.app' }}
         run: |
           for attempt in {1..30}; do
-            curl -fsSL "$SITE/?v=$GITHUB_SHA" -o /tmp/physics-index && grep -Fq 'id="school"' /tmp/physics-index && break
+            curl -fsSL "$SITE/?v=$GITHUB_SHA" -o /tmp/physics-index && grep -Fq 'id="examplesTab"' /tmp/physics-index && break
             sleep 5
           done
           grep -Fq '<html lang="en" dir="ltr">' /tmp/physics-index
           grep -Fq 'id="school"' /tmp/physics-index
           grep -Fq 'id="lawsTab"' /tmp/physics-index
+          grep -Fq 'id="examplesTab"' /tmp/physics-index
+          curl -fsSL --retry 3 "$SITE/worked/grade-12.js" -o /tmp/worked-12.js
+          grep -Fq 'G12A-Q20' /tmp/worked-12.js
+          curl -fsSL --retry 3 "$SITE/plates/27.png" -o /tmp/photoelectric.png
+          test "$(file -b --mime-type /tmp/photoelectric.png)" = image/png
           curl -fsSL --retry 3 "$SITE/math-input.js" -o /tmp/math-input.js
           grep -Fq 'mathlive.min.mjs' /tmp/math-input.js
           grep -Fq 'الهيكل 100 مع استاذ احمد غرايبة' /tmp/physics-index
