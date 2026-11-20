@@ -4,6 +4,7 @@ import {laws,relevantLaws} from './laws.js'
 import {plateCaptions} from './plates.js'
 import {englishHint} from './english-support.js'
 import {support} from './guides.js'
+import {conceptPractice} from './worked/concept-practice.js'
 import sourceFigures from './worked/source-figures.js'
 
 function el(tag,text){
@@ -96,12 +97,13 @@ function sourceExample(card,source,api,figures){
  return details
 }
 
-export async function makeExample({card,activeId,openLaw,api,figures}){
+export async function makeExample({card,activeId,openLaw,openQuestion,api,figures}){
  const examples=(await gradeModules[card.grade]()).default
  const example=examples[card.id]
  const sheet=el('article')
  sheet.className='example-sheet'
  sheet.append(el('small',card.id+' · '+t('Original worked example','مثال تدريبي مؤلّف')),el('p',card[lang()]),
+  el('small',t('Student book pages in the blueprint · ','صفحات الكتاب بحسب الهيكل · ')+card.bookPages.replaceAll(';',t(', ','، '))),
   el('strong',t('What to find','المطلوب')),el('h2',example.problem[lang()]))
  const id=exampleDiagrams[card.id]
  if(id!=null)sheet.append(diagram(id))
@@ -114,6 +116,21 @@ export async function makeExample({card,activeId,openLaw,api,figures}){
   links.append(link)
  }
  sheet.append(links)
+ const concepts=conceptPractice[card.id]
+ if(concepts){
+  const practice=el('section')
+  practice.className='concepts'
+  practice.append(el('h3',t('Practise a concept','تدرّب على مفهوم')))
+  const buttons=el('div')
+  buttons.className='tools'
+  for(const [id,en,ar] of concepts){
+   const button=el('button',t(en,ar))
+   button.onclick=()=>openQuestion(card,id)
+   buttons.append(button)
+  }
+  practice.append(buttons)
+  sheet.append(practice)
+ }
  const source=sourceFigures[card.id]?.find(item=>item.id!==activeId)
  if(source)sheet.append(sourceExample(card,source,api,figures))
  return sheet

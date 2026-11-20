@@ -50,9 +50,21 @@ async function init(){
  sessionStorage.setItem('physics-profile',JSON.stringify(profile))
  key='physics-practice-'+profile.startedAt
  try{cache=JSON.parse(localStorage.getItem(key)||'{}')}catch{cache={}}
- for(const r of await api('progress'))if(!cache[r.question]?.pending)cache[r.question]={response:r.response,checked:Boolean(r.checked),lo:r.lo}
- persist();await schedule();mock=await api('mock');await syncMock();mock=await api('mock');dashboard()
+ await schedule()
+ for(const r of await api('progress'))cache[r.question]={response:r.response,checked:Boolean(r.checked),lo:r.lo}
+ persist();mock=await api('mock');await syncMock();mock=await api('mock');dashboard()
+ await openLinkedCard()
 }
+async function openLinkedCard(){
+ if(!profile?.school)return
+ const linked=cards.find(c=>location.hash==='#'+c.id)
+ if(linked){
+  grade=linked.grade
+  if(activeTab!=='practice')showTab('practice')
+  await openCard(linked)
+ }
+}
+window.addEventListener('hashchange',guard(openLinkedCard))
 $('loginForm').onsubmit=guard(async e=>{e.preventDefault();await api('profile',{name:$('name').value,school:$('school').value});$('login').close();await init()})
 $('login').addEventListener('cancel',e=>e.preventDefault())
 let exampleRequest=0
@@ -92,6 +104,16 @@ function openLaw(gradeNumber,id){
  const section=$('law-'+id)
  section?.focus({preventScroll:true});section?.scrollIntoView({block:'center'})
 }
+const openQuestion=guard(async(card,id)=>{
+ const mark=++opened
+ const list=await api('card/'+card.id)
+ if(mark!==opened || activeTab!=='examples')return
+ const n=list.findIndex(q=>q.id===id)
+ if(n<0)throw Error('Question unavailable.')
+ grade=card.grade;current=card;items=list;index=n;inMock=false
+ showTab('practice');lesson()
+ document.getElementById('stem').scrollIntoView({block:'center'})
+})
 function openExamples(){
  if(inMock&&!mock?.done)return
  const currentId=items[index]?.lo
@@ -109,7 +131,7 @@ async function renderExamples(){
  if(!card)return
  const container=$('exampleContent')
  container.replaceChildren()
- const article=await makeExample({card,activeId:items[index]?.id,openLaw,api,figures})
+ const article=await makeExample({card,activeId:items[index]?.id,openLaw,openQuestion,api,figures})
  if(req===exampleRequest && activeTab==='examples')container.replaceChildren(article)
 }
 $('practiceTab').onclick=$('guideReturn').onclick=()=>showTab('practice')
@@ -121,27 +143,36 @@ $('lawsTab').onclick=()=>{
  fromExample=activeTab==='examples';$('lawGrade').value=String(inMock?mock.grade:grade);showTab('laws')
 }
 $('lawGrade').onchange=renderLaws
+async function openCard(card){
+ const mark=++opened
+ const list=await api('card/'+card.id)
+ if(mark!==opened)return
+ history.replaceState(null,'','#'+card.id)
+ current=card;items=list;inMock=false
+ index=Math.max(0,items.findIndex(q=>!cache[q.id]?.checked))
+ lesson()
+}
 function dashboard(){
  items=[];$('studyTabs').hidden=false;$('panelManual').disabled=$('examplesTab').disabled=false;opened++;inMock=false;$('lesson').hidden=true;$('dashboard').hidden=false;$('notice').textContent=''
  $('gradeTabs').replaceChildren(...[9,10,11,12].map(n=>{const b=button(t('Grade ','الصف ')+n,()=>{grade=n;dashboard()});b.setAttribute('aria-pressed',n===grade);return b}))
  $('outcomesLink').hash='grade-'+grade
  const group=cards.filter(c=>c.grade===grade);$('gradeTitle').textContent=t('Grade '+grade+' Advanced · '+group.length+' outcomes','الصف '+grade+' المتقدم · '+group.length+' مؤشراً')
  $('cards').replaceChildren(...group.map(c=>{
-   const b=button('',async()=>{const mark=++opened;const list=await api('card/'+c.id);if(mark!==opened)return;current=c;items=list;inMock=false;index=items.findIndex(q=>!cache[q.id]?.checked);index=Math.max(0,index);lesson()})
+   const b=button('',()=>openCard(c))
    b.className='kpi';const done=Object.values(cache).filter(v=>v.lo===c.id&&v.checked).length
    const bar=element('progress');bar.max=c.total;bar.value=done;bar.setAttribute('aria-label',t('Practice progress','تقدم التدريب'))
-   b.append(element('small',t('Outcome '+c.slot+' · '+c.total+' questions','مؤشر '+c.slot+' · '+c.total+' أسئلة')),element('h3',c[lang()]),bar,element('small',t(done+' of '+c.total+' reviewed','تمت مراجعة '+done+' من '+c.total)));return b
+   b.append(element('small',t('Outcome '+c.slot,'مؤشر '+c.slot)+' · '+(c.examType==='MCQ'?t('Multiple choice','اختيار من متعدد'):t('Written response','مقالي'))+' · '+c.total),element('h3',c[lang()]),bar,element('small',t(done+' of '+c.total+' reviewed','تمت مراجعة '+done+' من '+c.total)));return b
  }))
  $('resumeMock').hidden=!mock;$('resumeMock').textContent=mock?.done?t('Review latest mock','مراجعة آخر اختبار'):t('Resume Grade ','متابعة اختبار الصف ')+mock?.grade
 }
 function openMock(){inMock=true;items=mock.questions;current=null;index=0;lesson()}
 $('resumeMock').onclick=()=>openMock()
 $('mockStart').onclick=guard(async()=>{if(!mock||mock.done)mock=await api('mock/new',{grade});openMock()})
-$('back').onclick=()=>dashboard()
+$('back').onclick=()=>{history.replaceState(null,'',location.pathname+location.search);dashboard()}
 function lesson(){
  const q=items[index],draft=cache[q.id],answer=inMock?mock.answers[q.id]:draft?.response
  $('notice').textContent='';$('dashboard').hidden=true;$('lesson').hidden=false
- $('unit').textContent=inMock?t('Mock exam · Grade ','اختبار تجريبي · الصف ')+mock.grade:current.id+t(' · Grade ',' · الصف ')+current.grade
+ $('unit').textContent=inMock?t('Mock exam · Grade ','اختبار تجريبي · الصف ')+mock.grade:current.id+t(' · Student book pp. ',' · صفحات الكتاب ')+current.bookPages.replaceAll(';',t(', ','، '))
  const auto=inMock&&mock.done?items.filter(i=>i.kind==='MCQ'):[]
  $('title').textContent=inMock?(mock.done?t('Mock review · ','مراجعة الاختبار · ')+auto.filter(i=>mock.answers[i.id]===i.review.correct).length+'/'+auto.length+t(' multiple choice',' اختيار من متعدد'):t('Mock exam','اختبار الهيكل')):current[lang()]
  $('nav').replaceChildren(...items.map((v,n)=>{const b=button(n+1,()=>{index=n;lesson()});b.setAttribute('aria-pressed',n===index);b.classList.toggle('chip-done',inMock?!!mock.answers[v.id]:!!cache[v.id]?.checked);return b}))
