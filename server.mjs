@@ -6,7 +6,9 @@ import { DatabaseSync } from 'node:sqlite'
 import { pathToFileURL } from 'node:url'
 import { physicsApi } from './physics.mjs'
 import { readdirSync } from 'node:fs'
-import { extname } from 'node:path'
+import { extname, dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { scheduleBackups } from './lib/backup.mjs'
 
 const data = new URL('./data/', import.meta.url)
 mkdirSync(data, { recursive: true })
@@ -22,11 +24,13 @@ for (const name of readdirSync(new URL('./public/', import.meta.url),{recursive:
   if (mime[extname(name)]) assets.set('/'+name,[name,mime[extname(name)]])
 }
 async function jsonBody(request) {
+  // notebook pages carry handwriting strokes; every other request stays small
+  const limit = /^\/api\/(?:notebook|admin\/notebook|ask|admin\/rubric)/.test(request.url || '') ? 3_000_000 : 8192
   const decoder = new StringDecoder('utf8')
   let body = ''
   for await (const chunk of request) {
     body += decoder.write(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
-    if (body.length > 8192) throw new Error('Body is too large')
+    if (body.length > limit) throw new Error('Body is too large')
   }
   return JSON.parse(body + decoder.end())
 }
@@ -65,14 +69,21 @@ export async function handleRequest(request, response) {
         return reply(403, { error: 'Origin is not allowed' })
       }
     }
+    const policy = fromPages ? 'SameSite=None; Secure; Partitioned' : 'SameSite=Lax' + (request.headers['x-forwarded-proto'] === 'https' || request.socket.encrypted ? '; Secure' : '')
+    const cookies = []
+    const setCookie = (name, value, maxAge) => {
+      cookies.push(`${name}=${value}; Path=/; HttpOnly; ${policy}; Max-Age=${maxAge}`)
+      response.setHeader('Set-Cookie', cookies)
+    }
     let student = request.headers.cookie?.match(/(?:^|; *)physics_student=([a-f0-9-]{36})(?:;|$)/)?.[1]
     if (!student) {
       student = randomUUID()
-      const policy = fromPages ? 'SameSite=None; Secure; Partitioned' : 'SameSite=Lax' + (request.headers['x-forwarded-proto'] === 'https' || request.socket.encrypted ? '; Secure' : '')
-      response.setHeader('Set-Cookie', `physics_student=${student}; Path=/; HttpOnly; ${policy}; Max-Age=31536000`)
+      setCookie('physics_student', student, 31536000)
     }
-    if (/^\/api\/(catalog|profile|progress|card|figure|record|walkthrough|mock)(?:\/|$)/.test(path)) {
-      return await physics(path,request,response,student,reply,jsonBody)
+    const teacher = request.headers.cookie?.match(/(?:^|; *)physics_teacher=([a-f0-9]{64})(?:;|$)/)?.[1] || null
+    const session = { teacher, setCookie, assignStudent: id => setCookie('physics_student', id, 31536000) }
+    if (/^\/api\/(catalog|profile|progress|card|figure|record|walkthrough|mock|login|logout|notebook|tests|insights|ask|admin|leaderboard|hints)(?:\/|$)/.test(path)) {
+      return await physics(path,request,response,student,reply,jsonBody,session)
     }
     return reply(404, { error: 'غير متاح' })
   } catch (error) {
@@ -83,4 +94,8 @@ export async function handleRequest(request, response) {
 
 if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   createServer(handleRequest).listen(Number(process.env.PORT || 3000), '0.0.0.0')
+  // daily backups beside the database unless PHYSICS_BACKUP_DIR says otherwise; PHYSICS_BACKUP_HOURS=0 turns them off
+  const dbFile = process.env.PHYSICS_DB || fileURLToPath(new URL('practice.sqlite', data))
+  const hours = Number(process.env.PHYSICS_BACKUP_HOURS ?? 24)
+  if (hours > 0) scheduleBackups(db, process.env.PHYSICS_BACKUP_DIR || join(dirname(dbFile), 'backups'), hours)
 }

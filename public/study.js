@@ -10,6 +10,8 @@ import { installContentShield } from './content-shield.js'
 import { setupFloatingCalculator } from './floating-calculator.js'
 import { questionWatermark, watermarkCss } from './watermark.js'
 import { support, guides } from './guides.js'
+import { renderHub, splitTitle } from './student-hub.js'
+import { openNotebook, openNotebookList, openAsk } from './notebook-ui.js'
 
 const $=id=>document.getElementById(id)
 function element(tag,text){const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node}
@@ -23,6 +25,11 @@ async function api(path,body){
 let activeTab='practice'
 let cards=[],profile,grade=9,current,items=[],index=0,mock=null,inMock=false,cache={},key,queue=Promise.resolve(),replies={},opened=0
 const style=element('style',watermarkCss);document.head.append(style)
+// dark mode: follows the device unless the student chooses; the page itself stays white in the notebook
+function applyTheme(theme){document.documentElement.dataset.theme=theme;$('themeToggle').textContent=theme==='dark'?'☀':'☾'}
+let theme='light';try{theme=localStorage.getItem('physics-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}catch{}
+applyTheme(theme)
+$('themeToggle').onclick=()=>{theme=theme==='dark'?'light':'dark';applyTheme(theme);try{localStorage.setItem('physics-theme',theme)}catch{}}
 setupFloatingCalculator(document, './')
 function persist(){try{localStorage.setItem(key,JSON.stringify(cache))}catch{$('notice').textContent=t('Device storage is unavailable. Check your storage settings.','تعذّر الحفظ على الجهاز. تحقق من مساحة التخزين.')}}
 async function sync(){
@@ -48,6 +55,8 @@ function remember(id,response,checked=false){cache[id]={response,checked,pending
 async function init(){
  const catalog=await api('catalog');cards=catalog.cards;profile=catalog.profile
  if(!profile?.school){$('name').value=profile?.name||$('name').value; if(!$('login').open)$('login').showModal();return}
+ $('accountButton').hidden=false
+ if(!profile.hasPin){setLoginMode('new');$('name').value=profile.name;$('school').value=profile.school;$('loginError').textContent=t('Choose a PIN so you can sign in on any device.','اختر رقمًا سريًا لتتمكن من الدخول من أي جهاز.');$('login').showModal();return}
  sessionStorage.setItem('physics-profile',JSON.stringify(profile))
  key='physics-practice-'+profile.startedAt
  try{cache=JSON.parse(localStorage.getItem(key)||'{}')}catch{cache={}}
@@ -66,7 +75,33 @@ async function openLinkedCard(){
  }
 }
 window.addEventListener('hashchange',guard(openLinkedCard))
-$('loginForm').onsubmit=guard(async e=>{e.preventDefault();await api('profile',{name:$('name').value,school:$('school').value});$('login').close();await init()})
+let loginMode='new'
+function setLoginMode(mode){
+ loginMode=mode
+ $('tabNew').setAttribute('aria-selected',mode==='new');$('tabAccount').setAttribute('aria-selected',mode==='account')
+ $('newFields').hidden=mode!=='new';$('accountFields').hidden=mode!=='account';$('loginError').textContent=''
+}
+$('tabNew').onclick=()=>setLoginMode('new');$('tabAccount').onclick=()=>setLoginMode('account')
+$('loginForm').onsubmit=guard(async e=>{
+ e.preventDefault()
+ if(loginMode==='account'){
+  await api('login',{code:$('studentCode').value.trim(),pin:$('loginPin').value.trim()})
+ }else{
+  const fresh=!profile?.hasPin
+  const saved=await api('profile',{name:$('name').value,school:$('school').value,pin:$('pin').value.trim(),classCode:$('classCode').value.trim()})
+  if(fresh&&saved.code){$('login').close();showAccount(saved,true)}
+ }
+ if($('login').open)$('login').close()
+ await init()
+})
+function showAccount(p,justCreated=false){
+ $('accountCode').textContent=p.code||'—'
+ $('accountMeta').textContent=(justCreated?t('Write this code down with your PIN. ','اكتب هذا الرمز واحفظه مع رقمك السري. '):'')+(p.name||'')+(p.classCode?t(' · Class ',' · الصف ')+p.classCode:'')
+ $('accountDialog').showModal()
+}
+$('accountButton').onclick=()=>profile&&showAccount(profile)
+$('accountClose').onclick=()=>$('accountDialog').close()
+$('logoutButton').onclick=guard(async()=>{await api('logout',{});sessionStorage.removeItem('physics-profile');location.reload()})
 $('login').addEventListener('cancel',e=>e.preventDefault())
 let exampleRequest=0
 let fromExample=false
@@ -184,9 +219,18 @@ function dashboard(){
    const foot=element('small',t(done+' of '+c.total+' reviewed','تمت مراجعة '+done+' من '+c.total));foot.className='kpi-foot'
    b.append(head,element('h3',c[lang()]),bar,foot);return b
  }))
- $('resumeMock').hidden=!mock;$('resumeMock').textContent=mock?.done?t('Review latest mock','مراجعة آخر اختبار'):t('Resume Grade ','متابعة اختبار الصف ')+mock?.grade
+ void renderHub($('hub'),{api,grade,cards,onPracticeList:(list,title)=>openList(list,title),onMock:m=>{mock=m;openMock()},openCard:c=>{grade=c.grade;void guard(openCard)(c)},openNotebookList:guard(()=>openNotebookList({api})),openAsk:guard(()=>openAsk({api}))})
+ $('resumeMock').hidden=!mock;$('resumeMock').textContent=mock?.done?t('Review latest mock','مراجعة آخر اختبار'):mock?.title?t('Resume · ','متابعة · ')+splitTitle(mock.title):t('Resume Grade ','متابعة اختبار الصف ')+mock?.grade
 }
 function openMock(){inMock=true;items=mock.questions;current=null;index=0;lesson()}
+// A practice list that spans several outcomes, such as the mistakes queue
+function openList(list,title){
+ inMock=false;items=list;index=0
+ current={id:t('Review','مراجعة'),grade,bookPages:t('mixed outcomes','مؤشرات متنوعة'),en:title,ar:title}
+ $('studyTabs').hidden=false;lesson()
+}
+$('notebookBtn').onclick=guard(()=>openNotebook({api,question:items[index]}))
+$('askBtn').onclick=guard(()=>openAsk({api,question:items[index]}))
 $('resumeMock').onclick=()=>openMock()
 $('mockStart').onclick=guard(async()=>{if(!mock||mock.done)mock=await api('mock/new',{grade});openMock()})
 $('back').onclick=()=>{history.replaceState(null,'',location.pathname+location.search);dashboard()}
@@ -196,7 +240,7 @@ function lesson(){
  document.body.dataset.grade=inMock?mock.grade:current.grade
  $('unit').textContent=inMock?t('Mock exam · Grade ','اختبار تجريبي · الصف ')+mock.grade:current.id+t(' · Student book pp. ',' · صفحات الكتاب ')+current.bookPages.replaceAll(';',t(', ','، '))
  const points=inMock&&mock.done?items.reduce((sum,i)=>sum+(i.kind==='MCQ'?(mock.answers[i.id]===i.review.correct?1:0):(i.review?.grade?.total?i.review.grade.score/i.review.grade.total:0)),0):0
- $('title').textContent=inMock?(mock.done?t('Mock review · ','مراجعة الاختبار · ')+(Math.round(points*10)/10)+'/'+items.length+t(' · multiple choice and written marked automatically',' · الاختيار من متعدد والمقالي مصحّحان تلقائيًا'):t('Mock exam','اختبار الهيكل')):current[lang()]
+ $('title').textContent=inMock?(mock.done?t('Mock review · ','مراجعة الاختبار · ')+(Math.round(points*10)/10)+'/'+items.length+(mock.title?' · '+splitTitle(mock.title):t(' · multiple choice and written marked automatically',' · الاختيار من متعدد والمقالي مصحّحان تلقائيًا')):(splitTitle(mock.title)||t('Mock exam','اختبار الهيكل'))):current[lang()]
  $('nav').replaceChildren(...items.map((v,n)=>{const b=button(n+1,()=>{index=n;lesson()});b.setAttribute('aria-pressed',n===index);b.classList.toggle('chip-done',inMock?!!mock.answers[v.id]:!!cache[v.id]?.checked);return b}))
  $('meta').textContent=(q.kind==='MCQ'?t('Multiple choice','اختيار من متعدد'):t('Written response','إجابة مكتوبة'))+' · '+(index+1)+' / '+items.length
  $('wm').innerHTML=questionWatermark()
@@ -231,6 +275,7 @@ function lesson(){
   const label=element('label'),radio=element('input');radio.type='radio';radio.name='answer';radio.value=opt.key;radio.checked=answer===opt.key;radio.disabled=readonly;radio.onchange=()=>edit(opt.key)
   const desc=element('span');writePhysicsText(desc,opt.key+' · '+opt[lang()]);desc.title=opt[t('ar','en')];label.append(radio,desc);inputs.append(label)
  }else writtenEditor(inputs,q,answer,readonly,edit)
+ hintLevel=0;$('askBtn').hidden=inMock&&!mock.done
  $('hintText').hidden=true;$('result').hidden=true;$('walkthrough').hidden=inMock;$('manual').hidden=inMock&&!mock.done;$('hint').hidden=inMock&&!mock.done
  $('check').hidden=readonly;$('check').textContent=inMock?t('Finish mock','إنهاء الاختبار'):q.kind==='FRQ'?t('Check response','افحص الإجابة'):t('Check answer','تحقق من الإجابة')
  $('next').disabled=index===items.length-1
@@ -291,7 +336,8 @@ function showReview(q,r,answer,studyOnly=false){
  out.dataset.verdict=verdict
  out.hidden=false
  out.replaceChildren(element('h3',title))
- if(g && g.total && !exact)out.append(gradeReport(g))
+ if(r.teacher){const tb=element('section');tb.className='teacher-grade';tb.append(element('strong',t('Teacher’s mark: ','تصحيح المعلم: ')+r.teacher.score+'/'+r.teacher.total));if(r.teacher.note)tb.append(element('p',r.teacher.note));out.append(tb)}
+ if(g && g.total && !exact)out.append(gradeReport(g,q))
  const step=(heading,body)=>{
   const block=element('section');block.className='coach-step'
   const p=element('p');writePhysicsText(p,body)
@@ -358,7 +404,7 @@ function showReview(q,r,answer,studyOnly=false){
 
 }
 // Automatic marking report for a written response: score, one line per rubric item and a side-by-side comparison.
-function gradeReport(g){
+function gradeReport(g,q){
  const box=element('section');box.className='grade-report'
  const meter=element('div');meter.className='grade-meter';meter.style.setProperty('--score',Math.round(100*g.score/g.total)+'%')
  meter.append(element('b',Math.round(100*g.score/g.total)+'%'),element('span',t(g.score+' of '+g.total+' marking points',g.score+' من '+g.total+' نقاط تصحيح')))
@@ -377,7 +423,17 @@ function gradeReport(g){
   list.append(li)
  }
  box.append(meter,list)
- if(g.drawing)box.append(element('p',t('Drawings are not marked automatically. Compare your sketch with the worked solution figure.','الرسم لا يُصحَّح تلقائيًا؛ قارن رسمك بشكل الحل النموذجي.')))
+ // guiding questions instead of the answer (no external service)
+ const prompts=[]
+ for(const item of g.items){
+  if(item.ok)continue
+  if(item.type==='number')prompts.push({sign:t('Which direction did you take as positive? Check the sign of this result.','ما الاتجاه الذي اعتبرته موجبًا؟ راجع إشارة هذه النتيجة.'),scale:t('Did you convert every quantity to SI units before substituting?','هل حوّلت كل الكميات إلى وحدات SI قبل التعويض؟'),unit:t('What kind of quantity is asked for? Its unit should match.','ما نوع الكمية المطلوبة؟ يجب أن تتوافق وحدتها.'),missing:t('Which law links the given data to the result'+(item.unit?' in '+item.unit:'')+'? Write it, then substitute.','ما القانون الذي يربط المعطيات بالنتيجة'+(item.unit?' بوحدة '+item.unit:'')+'؟ اكتبه ثم عوّض.')}[item.code])
+  else prompts.push(item.code==='opposite'?t('Your answer says the opposite of what happens. Which way does it really go, and why?','إجابتك تذكر عكس ما يحدث. ما الصحيح؟ ولماذا؟'):t('Which physics idea explains this step? Name it in your answer.','ما المفهوم الفيزيائي الذي يفسّر هذه الخطوة؟ اذكره في إجابتك.'))
+ }
+ if(g.reasoning?.asks&&!g.reasoning.gives)prompts.push(t('The question asks you to explain. Link the result to its cause with “because” or “so”.','السؤال يطلب تفسيرًا. اربط النتيجة بسببها باستخدام «لأن» أو «إذن».'))
+ if(g.reasoning?.unitsMissing)prompts.push(t('Write the unit after every numerical result.','اكتب الوحدة بعد كل نتيجة عددية.'))
+ if(prompts.length){const s=element('section');s.className='socratic';s.append(element('strong',t('Questions to guide you','أسئلة توجّهك')));const ol=element('ul');for(const p of [...new Set(prompts)])ol.append(element('li',p));s.append(ol);box.append(s)}
+ if(g.drawing){box.append(element('p',t('Drawings are not marked automatically. Draw yours in the solution notebook and send it to your teacher.','الرسم لا يُصحَّح تلقائيًا؛ ارسمه في دفتر الحل وأرسله للمعلم.')));const nb=button(t('✎ Draw in the notebook','✎ ارسم في الدفتر'),()=>openNotebook({api,question:q}));nb.className='nb-open';box.append(nb)}
  if(g.compare){
   const panel=element('div');panel.className='compare';panel.hidden=true
   const column=(heading,segs,dir)=>{const col=element('div');col.dir=dir;col.append(element('h4',heading));const p=element('p');for(const seg of segs){if(seg.m){const m=element('mark',seg.t);m.dataset.m=seg.m;p.append(m)}else p.append(document.createTextNode(seg.t))}col.append(p);return col}
@@ -409,7 +465,26 @@ $('check').onclick=guard(async()=>{
  if(items[index]===q&&!inMock&&replies[q.id])showReview(q,replies[q.id],answer)
 })
 $('next').onclick=()=>{if(index+1<items.length){index++;lesson()}}
-$('hint').onclick=()=>{const p=$('hintText');p.textContent=t(englishHint(items[index].lo), support(items[index].lo).hint);p.hidden=!p.hidden}
+// Hint ladder without any external service: the idea, then the law, then clues from the marking rubric.
+let hintLevel=0
+$('hint').onclick=guard(async()=>{
+ const q=items[index],p=$('hintText')
+ hintLevel=Math.min(hintLevel+1,q.kind==='FRQ'?3:2)
+ const blocks=[[t('Hint 1 · The idea','تلميح 1 · الفكرة'),t(englishHint(q.lo),support(q.lo).hint)]]
+ if(hintLevel>=2)for(const law of relevantLaws(q.lo).slice(0,2))blocks.push([t('Hint 2 · The law','تلميح 2 · القانون')+' · '+t(law[2],law[3]),t(law[5],law[6])])
+ if(hintLevel>=3){
+  const h=await api('hints',{id:q.id})
+  const units=h.clues.filter(c=>c.type==='number').map(c=>c.unit||t('no unit','بلا وحدة'))
+  const lines=[]
+  if(units.length)lines.push(t('Your answer needs '+units.length+' numerical result'+(units.length>1?'s':'')+' in: ','إجابتك تحتاج '+units.length+' نتيجة عددية بالوحدات: ')+units.join('، '))
+  for(const c of h.clues.filter(c=>c.type==='idea'&&c[lang()]))lines.push(t('Complete the idea: ','أكمل الفكرة: ')+c[lang()])
+  if(h.drawing)lines.push(t('This question needs a diagram: draw it in the solution notebook.','هذا السؤال يحتاج رسمًا: ارسمه في دفتر الحل.'))
+  blocks.push([t('Hint 3 · What the answer must contain','تلميح 3 · ما يجب أن تحتويه الإجابة'),lines.join('\n')||t('Compare your steps with the law above.','قارن خطواتك بالقانون أعلاه.')])
+ }
+ p.replaceChildren(...blocks.map(([h,b])=>{const d=element('div');d.className='hint-step';const body=element('p');writePhysicsText(body,b);d.append(element('strong',h),body);return d}))
+ if(hintLevel<(q.kind==='FRQ'?3:2)){const more=button(t('Next hint','التلميح التالي'),()=>$('hint').click());more.className='hint-more';p.append(more)}
+ p.hidden=false
+})
 function showManual(id){
  const [title,steps]=t(englishGuides[id],guides[id]);const example=guides[id][2];const img=element('img')
  img.src='./manual/'+id+'.png';img.alt=t('Calculator screen for the worked example','شاشة الحاسبة في المثال التدريبي')
