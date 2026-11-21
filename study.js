@@ -275,7 +275,7 @@ function lesson(){
   const desc=element('span');writePhysicsText(desc,opt.key+' · '+opt[lang()]);desc.title=opt[t('ar','en')];label.append(radio,desc);inputs.append(label)
  }else writtenEditor(inputs,q,answer,readonly,edit)
  hintLevel=0;$('askBtn').hidden=inMock&&!mock.done
- $('hintText').hidden=true;$('result').hidden=true;$('walkthrough').hidden=inMock;$('manual').hidden=inMock&&!mock.done;$('hint').hidden=inMock&&!mock.done
+ $('hintText').hidden=true;$('result').hidden=true;$('walkthrough').hidden=inMock;$('manual').hidden=(inMock&&!mock.done)||!q.calc;$('hint').hidden=inMock&&!mock.done
  $('check').hidden=readonly;$('check').textContent=inMock?t('Finish mock','إنهاء الاختبار'):q.kind==='FRQ'?t('Check response','افحص الإجابة'):t('Check answer','تحقق من الإجابة')
  $('next').disabled=index===items.length-1
  if(readonly)showReview(q,q.review,answer)

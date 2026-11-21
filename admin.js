@@ -212,7 +212,10 @@ async function reviewPage(view, id) {
   wrap.append(surface, side); view.append(wrap)
   const teacher = { name: 'teacher', strokes: p.review?.annotations || [], editable: true, color: '#c0392b' }
   const figure = p.background?.includes('+figure') && p.question ? apiOrigin + '/api/admin/figure/' + p.question + '/question/0' : null
-  const pad = createSketchpad(surface, { layers: [{ name: 'student', strokes: p.strokes, editable: false }, teacher], background: p.background || 'blank', figureUrl: figure })
+  // the question printed on the student's page is drawn here too, so the teacher can write over it
+  const ql = (p.background?.match(/\+question:(ar|en)/) || [])[1] || 'ar'
+  const printed = p.questionText ? { text: p.questionText[ql] || p.questionText.en, options: (p.questionText.options || []).map(o => o.key + ' · ' + (o[ql] || o.en)), dir: ql === 'ar' ? 'rtl' : 'ltr' } : null
+  const pad = createSketchpad(surface, { layers: [{ name: 'student', strokes: p.strokes, editable: false }, teacher], background: p.background || 'blank', figureUrl: figure, question: printed })
   side.append(el('p', 'muted', 'اكتب بالقلم الأحمر فوق حل الطالب. خطوط الطالب لا تتغير.'), btn('▶ إعادة تشغيل حل الطالب', () => pad.replay(3)))
   const score = el('input'); score.placeholder = 'الدرجة (مثال 8/10)'; score.value = p.review?.score || ''
   const comment = el('textarea'); comment.placeholder = 'ملاحظة للطالب'
