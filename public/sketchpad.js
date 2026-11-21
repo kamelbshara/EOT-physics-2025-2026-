@@ -113,8 +113,13 @@ export function createSketchpad(host, { layers, background = 'blank', figureUrl 
     if (question && state.background.includes('+question')) top = drawQuestion() + 20
     if (state.figure) {
       const img = state.figure, w = Math.min(PAGE_W - 80, img.naturalWidth * 1.4), h = w * img.naturalHeight / img.naturalWidth
-      const fh = Math.min(h, PAGE_H * 0.5), fw = fh < h ? fh * img.naturalWidth / img.naturalHeight : w
-      ctx.drawImage(img, (PAGE_W - fw) / 2, top, fw, fh)
+      if (!state.background.includes('+question')) {
+        // pages saved before the printed question keep their original figure geometry, so existing ink stays aligned
+        ctx.drawImage(img, (PAGE_W - w) / 2, 30, w, Math.min(h, PAGE_H * 0.55))
+      } else {
+        const fh = Math.min(h, PAGE_H * 0.5), fw = fh < h ? fh * img.naturalWidth / img.naturalHeight : w
+        ctx.drawImage(img, (PAGE_W - fw) / 2, top, fw, fh)
+      }
     }
     ctx.restore()
   }
