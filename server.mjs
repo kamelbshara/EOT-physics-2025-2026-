@@ -41,10 +41,11 @@ export async function handleRequest(request, response) {
   response.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-ancestors 'self'; object-src 'none'; base-uri 'none'")
   try {
     const path = new URL(request.url, 'http://localhost').pathname
-    if (request.method === 'GET' && assets.has(path)) {
+    if ((request.method === 'GET' || request.method === 'HEAD') && assets.has(path)) {
       const [name, type] = assets.get(path)
-      response.writeHead(200, { 'Content-Type': type + '; charset=utf-8' })
-      return response.end(readFileSync(new URL('./public/' + name, import.meta.url)))
+      const file = readFileSync(new URL('./public/' + name, import.meta.url))
+      response.writeHead(200, { 'Content-Type': type + '; charset=utf-8', 'Content-Length': file.length })
+      return response.end(request.method === 'HEAD' ? undefined : file)
     }
     const origin = request.headers.origin
     const fromPages = origin === pagesOrigin
