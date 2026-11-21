@@ -164,14 +164,25 @@ async function openCard(card){
 }
 function dashboard(){
  items=[];$('studyTabs').hidden=false;$('panelManual').disabled=$('examplesTab').disabled=false;opened++;inMock=false;$('lesson').hidden=true;$('dashboard').hidden=false;$('notice').textContent=''
+ document.body.dataset.grade=grade
  $('gradeTabs').replaceChildren(...[9,10,11,12].map(n=>{const b=button(t('Grade ','الصف ')+n,()=>{grade=n;dashboard()});b.setAttribute('aria-pressed',n===grade);return b}))
  $('outcomesLink').hash='grade-'+grade
- const group=cards.filter(c=>c.grade===grade);$('gradeTitle').textContent=t('Grade '+grade+' Advanced · '+group.length+' outcomes','الصف '+grade+' المتقدم · '+group.length+' مؤشراً')
+ const group=cards.filter(c=>c.grade===grade)
+ const total=group.reduce((n,c)=>n+c.total,0),reviewed=Object.values(cache).filter(v=>v.checked&&group.some(c=>c.id===v.lo)).length
+ $('heroStats')?.replaceChildren(...[[group.length,t('outcomes','مؤشراً')],[total,t('questions','سؤالاً')],[Math.round(100*reviewed/(total||1))+'%',t('reviewed','تمت مراجعته')]].map(([v,l])=>{const d=element('span');d.append(element('b',String(v)),element('small',l));return d}))
+ $('gradeTitle').textContent=t('Grade '+grade+' Advanced · '+group.length+' outcomes','الصف '+grade+' المتقدم · '+group.length+' مؤشراً')
  $('cards').replaceChildren(...group.map(c=>{
    const b=button('',()=>openCard(c))
    b.className='kpi';const done=Object.values(cache).filter(v=>v.lo===c.id&&v.checked).length
    const bar=element('progress');bar.max=c.total;bar.value=done;bar.setAttribute('aria-label',t('Practice progress','تقدم التدريب'))
-   b.append(element('small',t('Outcome '+c.slot,'مؤشر '+c.slot)+' · '+(c.examType==='MCQ'?t('Multiple choice','اختيار من متعدد'):t('Written response','مقالي'))+' · '+c.total),element('h3',c[lang()]),bar,element('small',t(done+' of '+c.total+' reviewed','تمت مراجعة '+done+' من '+c.total)));return b
+   const mcq=c.examType==='MCQ';b.dataset.type=mcq?'mcq':'written';b.dataset.state=done>=c.total?'done':done?'progress':'new';b.style.setProperty('--pct',Math.round(100*done/c.total)+'%')
+   const head=element('small');head.className='kpi-head'
+   const no=element('span',String(c.slot));no.className='kpi-no';no.setAttribute('aria-label',t('Outcome '+c.slot,'مؤشر '+c.slot))
+   const kind=element('span',mcq?t('Multiple choice','اختيار من متعدد'):t('Written response','مقالي'));kind.className='kpi-type'
+   const count=element('span',c.total+t(' Qs',' سؤال'));count.className='kpi-count'
+   head.append(no,kind,count)
+   const foot=element('small',t(done+' of '+c.total+' reviewed','تمت مراجعة '+done+' من '+c.total));foot.className='kpi-foot'
+   b.append(head,element('h3',c[lang()]),bar,foot);return b
  }))
  $('resumeMock').hidden=!mock;$('resumeMock').textContent=mock?.done?t('Review latest mock','مراجعة آخر اختبار'):t('Resume Grade ','متابعة اختبار الصف ')+mock?.grade
 }
@@ -182,6 +193,7 @@ $('back').onclick=()=>{history.replaceState(null,'',location.pathname+location.s
 function lesson(){
  const q=items[index],draft=cache[q.id],answer=inMock?mock.answers[q.id]:draft?.response
  $('notice').textContent='';$('dashboard').hidden=true;$('lesson').hidden=false
+ document.body.dataset.grade=inMock?mock.grade:current.grade
  $('unit').textContent=inMock?t('Mock exam · Grade ','اختبار تجريبي · الصف ')+mock.grade:current.id+t(' · Student book pp. ',' · صفحات الكتاب ')+current.bookPages.replaceAll(';',t(', ','، '))
  const auto=inMock&&mock.done?items.filter(i=>i.kind==='MCQ'):[]
  $('title').textContent=inMock?(mock.done?t('Mock review · ','مراجعة الاختبار · ')+auto.filter(i=>mock.answers[i.id]===i.review.correct).length+'/'+auto.length+t(' multiple choice',' اختيار من متعدد'):t('Mock exam','اختبار الهيكل')):current[lang()]

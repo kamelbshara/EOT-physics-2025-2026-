@@ -1,0 +1,164 @@
+/* Polish layer · "Lab notebook" visual identity.
+   Loaded last; changes appearance only. Every grade gets its own accent colour. */
+:root{
+  --ink:#10302a;--muted:#5f6f67;--line:#e2e8df;--paper:#fff;--bg:#f4f6f0;
+  --brand:#0f4a3e;--brand-deep:#0a2f28;--lime:#d4f08a;
+  --accent:#0f7b5f;--tint:#e3f3ec;--accent-2:#0a5a45;
+  --written:#b5552f;--written-tint:#fcebe2;
+  --radius:18px;--shadow:0 1px 2px #0f2e2608,0 8px 24px #0f2e260d;--shadow-lift:0 2px 4px #0f2e260d,0 18px 40px #0f2e261c;
+}
+body[data-grade="10"]{--accent:#b26a12;--tint:#fbf0dc;--accent-2:#8a5009}
+body[data-grade="11"]{--accent:#5546b8;--tint:#ecebfa;--accent-2:#40339a}
+body[data-grade="12"]{--accent:#be3a5a;--tint:#fbe7ec;--accent-2:#972b45}
+
+body.student-design{
+  background-color:var(--bg);color:var(--ink);
+  background-image:radial-gradient(#0f4a3e10 1px,transparent 1.2px);background-size:22px 22px;background-attachment:fixed;
+}
+html[lang=ar] body.student-design,html[lang=ar] .student-design :is(h1,h2,h3,button){font-family:'Student Arabic',Tahoma,sans-serif}
+body.student-design main{max-width:1180px;margin-inline:auto}
+
+/* ── Masthead: sticky glass bar ───────────────────── */
+.student-design:not(.admin-mode) main>header.mast{
+  position:sticky;top:0;z-index:40;margin-inline:-12px;padding-inline:12px;
+  background:#f4f6f0d9;backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.mast .symbol{background:linear-gradient(145deg,var(--brand),var(--brand-deep));color:var(--lime);border-radius:14px;box-shadow:0 0 0 3px #d4f08a66,0 6px 14px #0f4a3e33;font-family:Georgia,serif}
+.mast .brand strong{letter-spacing:-.01em}
+.mast .brand small{color:var(--accent);font-weight:700;transition:color .3s}
+.mast [data-switch]{border-radius:999px;border:1px solid var(--line);background:#fff;padding:.45rem 1rem}
+.mast [data-switch]:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── Hero ─────────────────────────────────────────── */
+.student-design .hero{
+  position:relative;overflow:hidden;border-radius:26px;isolation:isolate;
+  background-color:var(--brand-deep);
+  background-image:
+    radial-gradient(600px 300px at 85% 10%,color-mix(in srgb,var(--accent) 55%,transparent),transparent 70%),
+    radial-gradient(500px 260px at 0% 100%,#d4f08a22,transparent 70%),
+    linear-gradient(90deg,#ffffff0a 1px,transparent 1px),linear-gradient(#ffffff0a 1px,transparent 1px);
+  background-size:auto,auto,28px 28px,28px 28px;
+  box-shadow:0 24px 60px #0a2f2833;
+}
+.student-design .hero::after{ /* faint formula watermark */
+  content:"F = ma   v = λf   E = mc²   p = mv";position:absolute;inset-inline-start:-10px;bottom:-14px;z-index:-1;
+  font:italic 700 clamp(40px,7vw,86px)/1 Georgia,serif;color:#ffffff08;white-space:nowrap;pointer-events:none;direction:ltr
+}
+.student-design .hero h1{font-size:clamp(34px,5.4vw,60px);font-weight:800}
+.student-design .hero>div>small{display:inline-flex;align-items:center;gap:8px;background:#d4f08a1a;border:1px solid #d4f08a40;padding:5px 12px;border-radius:999px}
+.student-design .hero>div>small::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 4px #d4f08a33;animation:pulse 2.4s ease-in-out infinite}
+.hero-stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.hero-stats:empty{display:none}
+.hero-stats span{display:flex;flex-direction:column;min-width:96px;padding:10px 16px;border-radius:14px;background:#ffffff0f;border:1px solid #ffffff1c;backdrop-filter:blur(4px)}
+.hero-stats b{font-size:24px;font-weight:800;color:#fff;line-height:1.2;font-variant-numeric:tabular-nums}
+.hero-stats small{all:unset;font-size:12px;color:#cfe3d8}
+.student-design .hero .experiment i{animation:swing 3.2s ease-in-out infinite alternate}
+.student-design .hero .experiment i:nth-child(2){animation-delay:-.4s}
+.student-design .hero .experiment i:nth-child(3){animation-delay:-.8s}
+.student-design .hero .experiment i:nth-child(4){animation-delay:-1.2s}
+@keyframes swing{from{rotate:-6deg}to{rotate:6deg}}
+@keyframes pulse{50%{box-shadow:0 0 0 7px #d4f08a00}}
+
+/* ── Grade switcher ───────────────────────────────── */
+.student-design #gradeTabs{background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);border-radius:999px;padding:5px}
+.student-design #gradeTabs button{border-radius:999px;padding:.55rem 1.15rem;font-weight:700;color:var(--muted);transition:background .2s,color .2s}
+.student-design #gradeTabs button:not([aria-pressed=true]):hover{color:var(--ink);background:#f1f4ee}
+.student-design #gradeTabs [aria-pressed=true]{background:var(--accent);color:#fff;box-shadow:0 4px 12px color-mix(in srgb,var(--accent) 40%,transparent)}
+
+/* ── Section heading ──────────────────────────────── */
+#dashboard>.heading{align-items:flex-end;margin-top:26px}
+#dashboard>.heading small{color:var(--accent);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+html[lang=ar] #dashboard>.heading small{letter-spacing:0}
+#gradeTitle{font-size:clamp(22px,2.6vw,28px);margin:.15em 0 .3em}
+#outcomesLink{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--accent);text-decoration:none;padding:5px 12px;border-radius:999px;background:var(--tint)}
+#outcomesLink::after{content:"↗"}
+#outcomesLink:hover{background:color-mix(in srgb,var(--accent) 18%,#fff)}
+.student-design .primary{background:var(--accent);border-color:var(--accent);color:#fff;border-radius:12px;font-weight:700;box-shadow:0 6px 16px color-mix(in srgb,var(--accent) 35%,transparent);transition:transform .15s,box-shadow .15s,background .2s}
+.student-design .primary:hover{background:var(--accent-2);transform:translateY(-1px)}
+#mockStart{padding:.75rem 1.3rem;font-size:14px}
+#mockStart::before{content:"⏱ "}
+
+/* ── Outcome cards ────────────────────────────────── */
+.student-design #cards{gap:18px;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr))}
+.student-design .kpi{
+  --type:var(--accent);--type-tint:var(--tint);
+  display:flex;flex-direction:column;gap:12px;text-align:start;
+  padding:18px 20px 16px;border-radius:var(--radius);border:1px solid var(--line);background:var(--paper);
+  box-shadow:var(--shadow);position:relative;overflow:hidden;
+  transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s,border-color .2s;
+}
+.student-design .kpi[data-type=written]{--type:var(--written);--type-tint:var(--written-tint)}
+.student-design .kpi::before{content:"";position:absolute;inset-block-start:0;inset-inline:0;height:4px;background:linear-gradient(90deg,var(--type),color-mix(in srgb,var(--type) 30%,transparent))}
+.student-design .kpi:hover,.student-design .kpi:focus-visible{transform:translateY(-4px);box-shadow:var(--shadow-lift);border-color:color-mix(in srgb,var(--type) 45%,#fff)}
+.kpi-head{display:flex;align-items:center;gap:10px;color:inherit}
+.kpi-no{display:grid;place-items:center;width:42px;height:42px;flex:none;border-radius:13px;background:var(--type-tint);color:var(--type);font:800 18px/1 Georgia,serif;font-variant-numeric:tabular-nums}
+.kpi-type{font-size:11.5px;font-weight:800;color:var(--type);background:var(--type-tint);padding:4px 10px;border-radius:999px}
+.kpi-count{margin-inline-start:auto;font-size:12px;font-weight:700;color:var(--muted)}
+.student-design .kpi h3{flex:1;margin:0;font-size:15px;line-height:1.6;font-weight:650;color:var(--ink);
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.student-design .kpi:hover h3{-webkit-line-clamp:unset}
+.student-design .kpi progress{appearance:none;-webkit-appearance:none;width:100%;height:7px;border:0;border-radius:999px;background:#edf1ea;overflow:hidden;margin:0}
+.student-design .kpi progress::-webkit-progress-bar{background:#edf1ea;border-radius:999px}
+.student-design .kpi progress::-webkit-progress-value{background:linear-gradient(90deg,var(--type),color-mix(in srgb,var(--type) 60%,#d4f08a));border-radius:999px}
+.student-design .kpi progress::-moz-progress-bar{background:var(--type);border-radius:999px}
+.kpi-foot{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--muted)}
+.kpi[data-state=progress] .kpi-foot{color:var(--type)}
+.kpi[data-state=done] .kpi-foot{color:#1d7a4c}
+.kpi[data-state=done] .kpi-foot::before{content:"✓";display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#1d7a4c;color:#fff;font-size:11px}
+.kpi[data-state=done] .kpi-no{background:#1d7a4c;color:#fff}
+
+/* ── Lesson page ──────────────────────────────────── */
+#lesson{max-width:1000px;margin-inline:auto}
+#lesson>.heading{margin-top:18px}
+#back{border-radius:999px;padding:.5rem 1rem;font-size:14px}
+#back::before{content:"← ";}
+html[dir=rtl] #back::before{content:"→ "}
+#clock:not(:empty){background:var(--brand-deep);color:var(--lime);padding:6px 14px;border-radius:999px;font-variant-numeric:tabular-nums}
+#unit{display:inline-block;margin-top:14px;color:var(--accent);background:var(--tint);padding:4px 12px;border-radius:999px;font-weight:700}
+#lesson>h1#title{font-size:clamp(22px,3vw,32px);line-height:1.35;margin:.5em 0 .6em}
+.student-design .chips{display:flex;flex-wrap:wrap;gap:8px}
+.student-design .chips button{width:38px;height:38px;padding:0;border-radius:12px;font-weight:800;border:1px solid var(--line);background:#fff;transition:all .15s}
+.student-design .chips button:hover{border-color:var(--accent);color:var(--accent)}
+.student-design .chips .chip-done{border-bottom:1px solid var(--line);background:var(--tint);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 35%,#fff)}
+.student-design .chips [aria-pressed=true]{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 4px 12px color-mix(in srgb,var(--accent) 40%,transparent)}
+.student-design .paper{max-width:none;margin-block:18px;border-radius:22px;border:1px solid var(--line);box-shadow:var(--shadow-lift);padding:clamp(18px,3vw,32px)}
+.student-design .paper::before{content:"";position:absolute;inset-block-start:0;inset-inline:0;height:5px;background:linear-gradient(90deg,var(--accent),var(--lime));z-index:1}
+.student-design .paper #meta{color:var(--muted);font-weight:700}
+.student-design .paper h2#stem{font-size:clamp(18px,2vw,22px);line-height:1.6}
+.student-design .paper label{border-radius:14px;border:1.5px solid var(--line);background:#fbfcfa;transition:border-color .15s,background .15s,transform .1s;cursor:pointer}
+.student-design .paper label:hover{border-color:color-mix(in srgb,var(--accent) 50%,#fff);background:#fff}
+.student-design .paper label:has(:checked){background:var(--tint);border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.student-design .paper input[type=radio]{accent-color:var(--accent);width:18px;height:18px}
+.student-design .paper .line{display:flex;flex-wrap:wrap;gap:8px;padding-top:16px;border-top:1px dashed var(--line)}
+.student-design .paper .line button{font-size:14px;padding:.6rem 1rem;border-radius:12px}
+.student-design .paper .line #next{margin-inline-start:auto}
+.student-design #walkthrough{background:color-mix(in srgb,var(--lime) 40%,#fff);border-color:#c5e08a}
+.student-design #hintText,.student-design #result{border-radius:16px;border-inline-start:4px solid var(--accent);background:var(--tint)}
+
+/* ── Login card ───────────────────────────────────── */
+.student-design #login{border-radius:26px;overflow:hidden;border:0}
+.student-design .lab-cover{background-image:radial-gradient(420px 260px at 100% 0%,#0f7b5f88,transparent 70%),linear-gradient(90deg,#ffffff0a 1px,transparent 1px),linear-gradient(#ffffff0a 1px,transparent 1px);background-size:auto,26px 26px,26px 26px}
+.student-design .lab-cover .experiment i{animation:swing 3.2s ease-in-out infinite alternate}
+.student-design #loginForm input{border:1.5px solid var(--line);background:#fbfcfa;transition:border-color .15s,box-shadow .15s}
+.student-design #loginForm input:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 4px var(--tint)}
+
+/* ── Side bookmarks ───────────────────────────────── */
+.student-design .bookmarks button{transition:transform .15s}
+.student-design .bookmarks button:hover{transform:translateX(-4px)}
+html[dir=rtl] .student-design .bookmarks button:hover{transform:translateX(4px)}
+
+:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 60%,transparent);outline-offset:2px}
+
+@media (max-width:580px){
+  .student-design .hero{border-radius:20px}
+  .hero-stats span{min-width:0;flex:1;padding:8px 10px}
+  .hero-stats b{font-size:19px}
+  .student-design #gradeTabs{border-radius:16px}
+  .student-design #gradeTabs button{white-space:nowrap;padding:.5rem .2rem;font-size:13px}
+  .student-design .paper .line #next{margin-inline-start:0}
+  .student-design .kpi h3{-webkit-line-clamp:5}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
