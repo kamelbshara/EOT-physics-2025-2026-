@@ -48,6 +48,10 @@ See [the bank review](BANK_REVIEW.md) and [the per-outcome coverage and worked-e
 
 A student check-in expires after 24 hours. Returning students check in again on the same browser to continue their saved work. The question bank itself stays read-only; teacher edits (marks, rubrics, classes, tests, reviews) are stored in the progress database.
 
+## Vercel
+
+A second copy of the student interface and teacher dashboard is published at https://haykal100.vercel.app. Vercel builds it from `main` using `vercel.json` and the project variable `PHYSICS_API_ORIGIN`. It is a static frontend, like GitHub Pages, and both copies use the same Railway server and database. The server accepts cross-origin requests from GitHub Pages and from `https://haykal100.vercel.app`; `PHYSICS_PAGES_ORIGIN` can list more origins, separated by commas.
+
 ## GitHub Pages
 
 The Pages workflow builds the student interface under the repository's project path. It publishes only files from `public/`. The Node service continues to serve private figures, grading and SQLite progress.

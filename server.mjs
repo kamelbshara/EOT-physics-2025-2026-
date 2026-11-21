@@ -18,7 +18,10 @@ const assets = new Map([
   ['/', ['index.html', 'text/html']],
 ])
 const physics = physicsApi(db)
-const pagesOrigin = process.env.PHYSICS_PAGES_ORIGIN || 'https://kamelbshara.github.io'
+// Frontends allowed to call this API from another origin: GitHub Pages and the Vercel copy, plus any listed in
+// PHYSICS_PAGES_ORIGIN (comma-separated). Every frontend shares this one server and database.
+const allowedOrigins = new Set(['https://kamelbshara.github.io', 'https://haykal100.vercel.app',
+  ...(process.env.PHYSICS_PAGES_ORIGIN || '').split(',').map(s => s.trim().replace(/\/$/, '')).filter(Boolean)])
 const mime = {'.css':'text/css','.js':'text/javascript','.mjs':'text/javascript','.html':'text/html','.woff2':'font/woff2','.woff':'font/woff','.png':'image/png','.svg':'image/svg+xml'}
 for (const name of readdirSync(new URL('./public/', import.meta.url),{recursive:true})) {
   if (mime[extname(name)]) assets.set('/'+name,[name,mime[extname(name)]])
@@ -52,11 +55,11 @@ export async function handleRequest(request, response) {
       return response.end(request.method === 'HEAD' ? undefined : file)
     }
     const origin = request.headers.origin
-    const fromPages = origin === pagesOrigin
+    const fromPages = Boolean(origin && allowedOrigins.has(origin))
     if (path.startsWith('/api/')) {
       response.setHeader('Vary', 'Origin')
       if (fromPages) {
-        response.setHeader('Access-Control-Allow-Origin', pagesOrigin)
+        response.setHeader('Access-Control-Allow-Origin', origin)
         response.setHeader('Access-Control-Allow-Credentials', 'true')
         if (request.method === 'OPTIONS') {
           response.writeHead(204, {
