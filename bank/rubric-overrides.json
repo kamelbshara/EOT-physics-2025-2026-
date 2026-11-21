@@ -1,0 +1,773 @@
+{
+ "_comment": "Hand-written marking rubrics. They replace the automatic rubric for these question IDs. numbers: [value, unit|null]. ideas: either {\"key\": <built-in idea>} or {\"en\": [...], \"ar\": [...]} where any listed phrase counts; a trailing * matches any word ending.",
+ "EOT-SRC10-M099": {
+  "ideas": [
+   {
+    "en": [
+     "between the vertex and f",
+     "between v and f",
+     "between f and v",
+     "between the vertex and the focus",
+     "between the mirror and f",
+     "between the mirror and the focus",
+     "between vertex and focus"
+    ],
+    "ar": [
+     "بين سطح المراه وبؤرتها",
+     "بين الراس والبؤره",
+     "بين المراه والبؤره",
+     "بين v و f",
+     "بين f و v",
+     "بين الراس و f"
+    ]
+   },
+   {
+    "en": [
+     "behind the mirror",
+     "behind it",
+     "virtual"
+    ],
+    "ar": [
+     "خلف المراه",
+     "وراء المراه",
+     "وهمي*"
+    ]
+   }
+  ]
+ },
+ "EOT-SRC10-M100": {
+  "ideas": [
+   {
+    "en": [
+     "dashed",
+     "dotted",
+     "broken line*"
+    ],
+    "ar": [
+     "متقطع*",
+     "منقط*"
+    ]
+   },
+   {
+    "en": [
+     "extension*",
+     "extended backward*",
+     "not a real path",
+     "no light",
+     "virtual",
+     "as though",
+     "appear to come",
+     "appears to come",
+     "behind the mirror"
+    ],
+    "ar": [
+     "امتداد*",
+     "وهمي*",
+     "لا يسير فيه الضوء",
+     "ليس مسارا"
+    ]
+   }
+  ]
+ },
+ "EOT-SRC10-M108": {
+  "ideas": [
+   {
+    "en": [
+     "toward the normal",
+     "towards the normal",
+     "closer to the normal",
+     "smaller angle"
+    ],
+    "ar": [
+     "نحو العمود",
+     "يقترب من العمود",
+     "الزاويه اصغر",
+     "اصغر"
+    ]
+   },
+   {
+    "en": [
+     "away from the normal",
+     "away from it",
+     "larger angle"
+    ],
+    "ar": [
+     "يبتعد عن العمود",
+     "مبتعدا",
+     "يجعلها اكبر",
+     "اكبر"
+    ]
+   }
+  ]
+ },
+ "EOT-SRC10-M131": {
+  "ideas": [
+   {
+    "en": [
+     "overlap*",
+     "coincide*",
+     "superimpose*",
+     "mix*"
+    ],
+    "ar": [
+     "تتداخل",
+     "تتراكب",
+     "تتطابق",
+     "تختلط",
+     "تداخل",
+     "تتقارب"
+    ]
+   },
+   {
+    "en": [
+     "mλ",
+     "m λ",
+     "order and wavelength",
+     "depends on wavelength",
+     "depends on λ",
+     "wavelength-dependent",
+     "wavelength dependent",
+     "depend on wavelength",
+     "positions depend"
+    ],
+    "ar": [
+     "mλ",
+     "حاصل",
+     "يعتمد على الطول الموجي",
+     "الرتبه والطول الموجي",
+     "رتب والوان"
+    ]
+   }
+  ]
+ },
+ "EOT-SRC10-M133": {
+  "numbers": [
+   [
+    4.0,
+    "mm"
+   ]
+  ],
+  "ideas": [
+   {
+    "en": [
+     "symmetric*",
+     "equal distance*",
+     "same distance",
+     "equal",
+     "equally"
+    ],
+    "ar": [
+     "متساو*",
+     "متماثل*",
+     "متناظر*",
+     "نفس البعد",
+     "يتساوى",
+     "بعداهما"
+    ]
+   }
+  ]
+ },
+ "EOT-SRC10-V25": {
+  "ideas": [
+   {
+    "en": [
+     "regularly spaced",
+     "evenly spaced",
+     "equally spaced",
+     "periodic*",
+     "grating",
+     "tracks",
+     "grooves"
+    ],
+    "ar": [
+     "منتظمه التباعد",
+     "متساويه التباعد",
+     "دوري*",
+     "محزوز",
+     "مسارات",
+     "اخاديد"
+    ]
+   },
+   {
+    "key": "interference"
+   },
+   {
+    "en": [
+     "different angle*",
+     "angle depends",
+     "depends on the angle",
+     "different wavelengths"
+    ],
+    "ar": [
+     "زوايا مختلفه",
+     "باختلاف الزاويه",
+     "اطوال موجيه مختلفه"
+    ]
+   }
+  ]
+ },
+ "EOT-VAR10-15": {
+  "ideas": [
+   {
+    "key": "toward the normal"
+   },
+   {
+    "en": [
+     "halves",
+     "half",
+     "smaller angle",
+     "angle decreases",
+     "decreases"
+    ],
+    "ar": [
+     "تنصف",
+     "نصف",
+     "يقل",
+     "تصغر",
+     "اصغر"
+    ]
+   }
+  ]
+ },
+ "G9A-EXT-037": {
+  "numbers": [
+   [
+    0.5,
+    "mL"
+   ],
+   [
+    25,
+    "mL"
+   ],
+   [
+    50,
+    null
+   ]
+  ]
+ },
+ "G9A-EXT-070": {
+  "ideas": [
+   {
+    "key": "base quantity"
+   },
+   {
+    "key": "derived quantity"
+   },
+   {
+    "en": [
+     "kilogram",
+     "kg"
+    ],
+    "ar": [
+     "الكيلوغرام",
+     "الكيلوجرام",
+     "kg",
+     "كجم",
+     "كيلوغرام"
+    ]
+   },
+   {
+    "en": [
+     "m³",
+     "m^3",
+     "kg/m³",
+     "kg/m^3",
+     "cubic metre",
+     "cubic meter"
+    ],
+    "ar": [
+     "m³",
+     "kg/m³",
+     "م³",
+     "كجم/م³",
+     "متر مكعب"
+    ]
+   }
+  ]
+ },
+ "G9A-EXT-088": {
+  "ideas": [
+   {
+    "en": [
+     "0-2",
+     "0 - 2"
+    ],
+    "ar": [
+     "0-2",
+     "0 - 2"
+    ]
+   },
+   {
+    "en": [
+     "3-5",
+     "3 - 5"
+    ],
+    "ar": [
+     "3-5",
+     "3 - 5"
+    ]
+   },
+   {
+    "en": [
+     "8-10",
+     "8 - 10"
+    ],
+    "ar": [
+     "8-10",
+     "8 - 10"
+    ]
+   },
+   {
+    "en": [
+     "6-7",
+     "6 - 7"
+    ],
+    "ar": [
+     "6-7",
+     "6 - 7"
+    ]
+   },
+   {
+    "en": [
+     "never negative",
+     "not negative",
+     "no reversal",
+     "does not reverse",
+     "never reverses",
+     "positive throughout",
+     "always positive",
+     "never becomes negative"
+    ],
+    "ar": [
+     "لا تصبح السرعه سالبه",
+     "ليست سالبه",
+     "لا يوجد انعكاس",
+     "لا يظهر انعكاس",
+     "موجبه دائما",
+     "دائما موجبه",
+     "لا تكون سالبه"
+    ]
+   }
+  ]
+ },
+ "SRC10-F047": {
+  "ideas": [
+   {
+    "en": [
+     "coplanar",
+     "same plane",
+     "one plane"
+    ],
+    "ar": [
+     "مستوي واحد",
+     "المستوي نفسه",
+     "نفس المستوي"
+    ]
+   },
+   {
+    "en": [
+     "equal",
+     "angle of incidence equals",
+     "θi = θr",
+     "θr = θi",
+     "i = r"
+    ],
+    "ar": [
+     "متساو*",
+     "تساوي",
+     "يساوي"
+    ]
+   },
+   {
+    "en": [
+     "from the normal",
+     "measured from the normal",
+     "measured from the perpendicular",
+     "perpendicular normal"
+    ],
+    "ar": [
+     "من العمود",
+     "عن العمود"
+    ]
+   }
+  ]
+ },
+ "SRC10-F063": {
+  "ideas": [
+   {
+    "en": [
+     "equal path*",
+     "zero path difference",
+     "path difference is zero",
+     "reinforce*",
+     "all wavelengths",
+     "all colours",
+     "all colors"
+    ],
+    "ar": [
+     "يتساوى المساران",
+     "فرق المسار صفر",
+     "جميع الالوان",
+     "كل الالوان",
+     "تتعزز"
+    ]
+   },
+   {
+    "en": [
+     "proportional to λ",
+     "proportional to wavelength",
+     "longer wavelength",
+     "larger wavelength",
+     "λ is larger",
+     "greater wavelength"
+    ],
+    "ar": [
+     "طول موجي اكبر",
+     "الطول الموجي الاكبر",
+     "λ للاحمر اكبر",
+     "اطول",
+     "يتناسب طرديا"
+    ]
+   }
+  ]
+ },
+ "SRC10-F066": {
+  "numbers": [
+   [
+    0.25,
+    null
+   ]
+  ],
+  "ideas": [
+   {
+    "en": [
+     "closer",
+     "toward the centre",
+     "toward the center",
+     "quarter",
+     "decreases"
+    ],
+    "ar": [
+     "اقرب",
+     "ربع",
+     "يقترب",
+     "يقل"
+    ]
+   }
+  ]
+ },
+ "SRC10-F069": {
+  "ideas": [
+   {
+    "en": [
+     "broad central",
+     "wide central",
+     "central maximum"
+    ],
+    "ar": [
+     "عظمي مركزيه",
+     "المركزيه عريضه",
+     "مركزيه عريضه"
+    ]
+   },
+   {
+    "en": [
+     "red minima farther",
+     "red is wider",
+     "red wider",
+     "red broader",
+     "red farther",
+     "red is broader"
+    ],
+    "ar": [
+     "الاحمر ابعد",
+     "الاحمر اعرض",
+     "صغري الاحمر ابعد"
+    ]
+   },
+   {
+    "en": [
+     "white cent*",
+     "white in the cent*",
+     "centre is white",
+     "center is white",
+     "coloured",
+     "colored"
+    ],
+    "ar": [
+     "مركزا ابيض",
+     "مركز ابيض",
+     "ابيض",
+     "ملونه"
+    ]
+   }
+  ]
+ },
+ "SRC10-F071": {
+  "ideas": [
+   {
+    "en": [
+     "λ/2",
+     "λ / 2",
+     "half a wavelength",
+     "half wavelength",
+     "half-wavelength"
+    ],
+    "ar": [
+     "λ/2",
+     "نصف طول موجي",
+     "نصف الطول الموجي"
+    ]
+   },
+   {
+    "en": [
+     "cancel*",
+     "pairs",
+     "destructive"
+    ],
+    "ar": [
+     "تتلاشي",
+     "زوجي*",
+     "تلغي",
+     "هدام*"
+    ]
+   },
+   {
+    "en": [
+     "w sin θ = λ",
+     "w sinθ = λ",
+     "w sin θ₁ = λ",
+     "wsinθ=λ",
+     "2λl/w",
+     "2λ l / w"
+    ],
+    "ar": [
+     "w sinθ₁ = λ",
+     "w sin θ = λ",
+     "2λl/w",
+     "wsinθ=λ"
+    ]
+   }
+  ]
+ },
+ "SRC10-F074": {
+  "ideas": [
+   {
+    "en": [
+     "evenly spaced",
+     "equally spaced",
+     "regularly spaced",
+     "rule*",
+     "groove*",
+     "replicat*",
+     "etch*"
+    ],
+    "ar": [
+     "متساويه التباعد",
+     "اخاديد",
+     "حفر",
+     "نسخ"
+    ]
+   },
+   {
+    "en": [
+     "separate wavelengths",
+     "separates wavelengths",
+     "spectroscop*",
+     "spectrum",
+     "measure wavelength*"
+    ],
+    "ar": [
+     "فصل الاطوال الموجيه",
+     "مطياف",
+     "طيف"
+    ]
+   },
+   {
+    "en": [
+     "reflected light",
+     "transmitted light",
+     "transmits",
+     "transmission uses"
+    ],
+    "ar": [
+     "المنعكس",
+     "النافذ"
+    ]
+   }
+  ]
+ },
+ "SRC10-V40": {
+  "ideas": [
+   {
+    "en": [
+     "coincide",
+     "all colours at the centre",
+     "all colors at the center",
+     "white centre",
+     "white center",
+     "all colours",
+     "all colors"
+    ],
+    "ar": [
+     "تتطابق جميع الالوان",
+     "جميع الالوان عند المركز",
+     "تتطابق"
+    ]
+   },
+   {
+    "en": [
+     "longer wavelength",
+     "larger wavelength",
+     "greater spacing",
+     "wider spacing",
+     "larger spacing"
+    ],
+    "ar": [
+     "الطول الموجي الاكبر",
+     "تباعدا اكبر",
+     "طول موجي اكبر"
+    ]
+   },
+   {
+    "en": [
+     "red farther",
+     "red is farther",
+     "red further",
+     "red is further",
+     "red lies farther",
+     "red lies further",
+     "red farther out"
+    ],
+    "ar": [
+     "الاحمر ابعد"
+    ]
+   }
+  ]
+ },
+ "SRC10-V44": {
+  "ideas": [
+   {
+    "en": [
+     "2x₁",
+     "2x1",
+     "2 x1",
+     "twice",
+     "double",
+     "±x"
+    ],
+    "ar": [
+     "2x₁",
+     "2x1",
+     "ضعف",
+     "مثلي",
+     "±x"
+    ]
+   },
+   {
+    "en": [
+     "tan θ",
+     "tanθ",
+     "sin θ",
+     "sinθ",
+     "small-angle",
+     "small angle"
+    ],
+    "ar": [
+     "tanθ",
+     "sinθ",
+     "الزاويه الصغيره",
+     "زاويه صغيره"
+    ]
+   }
+  ]
+ },
+ "SRC10-V47": {
+  "ideas": [
+   {
+    "en": [
+     "m = 0",
+     "m=0",
+     "zero order",
+     "zeroth order",
+     "sin θ = 0",
+     "sinθ = 0"
+    ],
+    "ar": [
+     "m = 0",
+     "m=0",
+     "الرتبه الصفريه",
+     "sinθ = 0"
+    ]
+   },
+   {
+    "en": [
+     "2λ/d",
+     "depends on wavelength",
+     "depends on λ",
+     "different wavelength*",
+     "wavelength-dependent",
+     "wavelength dependent"
+    ],
+    "ar": [
+     "2λ/d",
+     "باختلاف λ",
+     "باختلاف الطول الموجي",
+     "يعتمد على الطول الموجي",
+     "تختلف"
+    ]
+   }
+  ]
+ },
+ "EOT-SRC10-V02": {
+  "numbers": [
+   [
+    47,
+    "°"
+   ],
+   [
+    43,
+    "°"
+   ]
+  ]
+ },
+ "SRC10-V41": {
+  "numbers": [
+   [
+    1.5,
+    null
+   ]
+  ]
+ },
+ "EOT-SRC10-M136": {
+  "numbers": [
+   [
+    12.0,
+    "mm"
+   ]
+  ]
+ },
+ "EOT-SRC10-M147": {
+  "numbers": [
+   [
+    10,
+    "mm"
+   ]
+  ]
+ },
+ "EOT-SRC10-M141": {
+  "ideas": [
+   {
+    "en": [
+     "white"
+    ],
+    "ar": [
+     "ابيض",
+     "بيضاء",
+     "البيضاء",
+     "الابيض"
+    ]
+   }
+  ]
+ }
+}

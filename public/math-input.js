@@ -49,9 +49,9 @@ export function writtenEditor(parent,question,value,readOnly,save){
   }
   parent.append(line)
  })
- const extra=node('details');extra.open=!fields.length||Boolean(draft.text||draft.latex)
- extra.append(node('summary',t('Your answer · text or maths','إجابتك · نص أو رموز رياضية')))
- const note=node('textarea');note.placeholder=t('Type a short answer','اكتب جوابًا قصيرًا');note.setAttribute('aria-label',note.placeholder);note.value=draft.text;note.disabled=readOnly;note.dir='auto'
+ const extra=node('details');extra.open=true;extra.className='full-answer'
+ extra.append(node('summary',t('Your full answer · marked automatically','إجابتك الكاملة · تُصحَّح تلقائيًا')))
+ const note=node('textarea');note.placeholder=t('Write your whole answer: results with units and your explanation, in English or Arabic','اكتب إجابتك كاملة: النتائج مع وحداتها والتفسير، بالعربية أو الإنجليزية');note.setAttribute('aria-label',note.placeholder);note.value=draft.text;note.disabled=readOnly;note.dir='auto'
  note.oninput=()=>{draft.text=note.value;changed()}
  extra.append(note,makeField(draft.latex,t('Mathematical answer','الإجابة الرياضية'),v=>{draft.latex=v;changed()}));parent.append(extra)
  void loadMath().then(()=>{for(const field of parent.querySelectorAll('math-field'))field.mathVirtualKeyboardPolicy='manual'}).catch(()=>{for(const field of parent.querySelectorAll('math-field')){const input=node('input');input.placeholder='LaTeX';input.value=field.textContent;input.disabled=readOnly;input.oninput=()=>{field.value=input.value;field.dispatchEvent(new Event('input'))};field.replaceWith(input)}})
