@@ -4,13 +4,13 @@ English-first, bilingual Advanced Physics final exam practice for Grades 9–12.
 
 ## Students, teacher dashboard and notebook
 
-**Accounts.** A new student enters a name, a school, an optional class code from the teacher, and a 4–6 digit PIN. They receive a six-digit student code and can sign in on any device with that code and their PIN. Students who registered before PINs existed are asked to choose one at their next check-in.
+**Accounts.** A new student enters a name, a school and an optional class code from the teacher, and receives a six-digit student code. On any device they sign in with that code and their name; spelling variants such as ة/ه and أ/ا are accepted. There is no PIN.
 
 **Teacher dashboard** at `/admin.html` needs `PHYSICS_TEACHER_PASSWORD` set on the server. It covers:
 - an overview with the weakest outcomes;
 - students, with their mastery map, mock and test scores, and written answers;
 - teacher marks that replace the automatic grade, with a note to the student;
-- PIN resets and class changes;
+- class changes;
 - classes with codes and an optional class leaderboard;
 - tests generated per outcome in the blueprint question type, or hand-picked, assigned to a class or to everyone with an optional deadline;
 - notebook review, student questions, an editor for the automatic marking rubrics, and CSV exports.

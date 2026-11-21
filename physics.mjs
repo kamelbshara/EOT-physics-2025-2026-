@@ -2,7 +2,7 @@ import { fieldsFor, coach, unpack } from './lib/coach.mjs'
 import { grade } from './lib/grader.mjs'
 import { platformApi } from './lib/platform.mjs'
 import { DatabaseSync } from 'node:sqlite'
-import { randomUUID, scryptSync, randomBytes, timingSafeEqual } from 'node:crypto'
+import { randomUUID } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 
 const bank = new DatabaseSync(new URL('./bank/physics.sqlite', import.meta.url), { readOnly: true })
@@ -89,7 +89,7 @@ export function physicsApi(db) {
   }
   const studyView=db.prepare('SELECT 1 FROM physics_study_views WHERE student=? AND question=?')
   const activeVisit=db.prepare('SELECT 1 FROM physics_visits WHERE student=? AND expires>?')
-  const profile = db.prepare('SELECT name,school,started AS startedAt,code,class_code AS classCode,pin IS NOT NULL AS hasPin FROM physics_profiles WHERE student=?')
+  const profile = db.prepare('SELECT name,school,started AS startedAt,code,class_code AS classCode FROM physics_profiles WHERE student=?')
   const progress = db.prepare('SELECT question,response,checked FROM physics_progress WHERE student=?')
   const write = db.prepare('INSERT INTO physics_progress VALUES(?,?,?,?) ON CONFLICT(student,question) DO UPDATE SET response=excluded.response,checked=excluded.checked')
   const copyProgress=db.prepare('INSERT OR IGNORE INTO physics_progress(student,question,response,checked) VALUES(?,?,?,?)')
@@ -121,7 +121,7 @@ export function physicsApi(db) {
     db.prepare('INSERT INTO physics_mocks(id,student,grade,ids,answers,deadline,done,test_id,title) VALUES(?,?,?,?,?,?,0,?,?)').run(id,student,gradeNumber,JSON.stringify(ids),'{}',Date.now()+60000*minutes,testId,title)
     return mockView(getMock.get(student))
   }
-  const platform=platformApi(db,{bank,cards,question,prompt,solution,validAnswer,studentProgress,mockView,getMock,createMock,isActive:student=>Boolean(activeVisit.get(student,Date.now())&&profile.get(student)?.school),profile,hashPin,checkPin,write,readBank:file=>readFileSync(new URL('./bank/'+file,import.meta.url))})
+  const platform=platformApi(db,{bank,cards,question,prompt,solution,validAnswer,studentProgress,mockView,getMock,createMock,isActive:student=>Boolean(activeVisit.get(student,Date.now())&&profile.get(student)?.school),profile,write,readBank:file=>readFileSync(new URL('./bank/'+file,import.meta.url))})
   return async function(path,req,res,student,reply,readBody,session={}) {
     if (path === '/api/catalog' && req.method==='GET') return reply(200,{cards,profile:activeVisit.get(student, Date.now()) ? profile.get(student) : null})
     let body={}
@@ -131,15 +131,11 @@ export function physicsApi(db) {
     if(path==='/api/profile' && req.method==='POST'){
       const name=typeof body.name==='string' ? body.name.trim() : ''
       const school=typeof body.school==='string' ? body.school.trim() : ''
-      const pin=typeof body.pin==='string' ? body.pin.trim() : ''
       const classCode=typeof body.classCode==='string' ? body.classCode.trim().toUpperCase() : ''
       if(name.length<2 || name.length>80 || school.length<2 || school.length>120)return reply(400,{error:'تحقق من اسم الطالب والمدرسة'})
-      const existing=db.prepare('SELECT code,pin FROM physics_profiles WHERE student=?').get(student)
-      if(pin && !/^\d{4,6}$/.test(pin))return reply(400,{error:'الرقم السري من 4 إلى 6 أرقام'})
-      if(!pin && !existing?.pin)return reply(400,{error:'اختر رقمًا سريًا من 4 إلى 6 أرقام'})
+      const existing=db.prepare('SELECT code FROM physics_profiles WHERE student=?').get(student)
       if(classCode && !db.prepare('SELECT 1 FROM physics_classes WHERE code=?').get(classCode))return reply(400,{error:'رمز الصف غير صحيح'})
       db.prepare('INSERT INTO physics_profiles(student,name,started,school) VALUES(?,?,?,?) ON CONFLICT(student) DO UPDATE SET name=excluded.name,school=excluded.school').run(student,name,new Date().toISOString(),school)
-      if(pin)db.prepare('UPDATE physics_profiles SET pin=? WHERE student=?').run(hashPin(pin),student)
       if(classCode)db.prepare('UPDATE physics_profiles SET class_code=? WHERE student=?').run(classCode,student)
       if(!existing?.code){
         let code
@@ -212,10 +208,3 @@ export function physicsApi(db) {
 }
 function validAnswer(q,value){return typeof value==='string' && value.length<=2500 && (q.kind==='FRQ' || q.options.some(o=>o.key===value))}
 
-function hashPin(pin){const salt=randomBytes(16).toString('hex');return salt+':'+scryptSync(pin,salt,32).toString('hex')}
-function checkPin(pin,stored){
-  if(!stored||typeof pin!=='string')return false
-  const [salt,hash]=stored.split(':')
-  const a=Buffer.from(hash,'hex'),b=scryptSync(pin,salt,32)
-  return a.length===b.length&&timingSafeEqual(a,b)
-}

@@ -40,9 +40,9 @@ await step('teacher signs in and creates a class', async () => {
   await tp.waitForSelector('.code'); classCode = (await tp.textContent('.code')).trim()
   expect(/^PH\d{4}$/.test(classCode), 'class code ' + classCode)
 })
-await step('student registers with class code and PIN', async () => {
+await step('student registers with name, school and class code', async () => {
   await sp.goto(BASE + '/')
-  await sp.fill('#name', 'Test Student'); await sp.fill('#school', 'Test School'); await sp.fill('#classCode', classCode); await sp.fill('#pin', '2468')
+  await sp.fill('#name', 'Test Student'); await sp.fill('#school', 'Test School'); await sp.fill('#classCode', classCode)
   await sp.click('#loginForm .primary')
   await sp.waitForSelector('#accountDialog[open]')
   studentCode = (await sp.textContent('#accountCode')).trim()
@@ -117,11 +117,11 @@ await step('the blueprint mock exam still starts and finishes', async () => {
   await sp.waitForFunction(() => document.querySelectorAll('#nav button').length === 20)
   await sp.click('#check'); await sp.waitForFunction(() => /Mock review|مراجعة/.test(document.getElementById('title').textContent))
 })
-await step('student signs in on a phone with code and PIN', async () => {
+await step('student signs in on a phone with code and name', async () => {
   const phone = await browser.newContext({ viewport: { width: 390, height: 844 } })
   const p = await phone.newPage(); watch(p, 'phone')
   await p.goto(BASE + '/'); await p.click('#tabAccount')
-  await p.fill('#studentCode', studentCode); await p.fill('#loginPin', '2468'); await p.click('#loginForm .primary')
+  await p.fill('#studentCode', studentCode); await p.fill('#loginName', 'test  student'); await p.click('#loginForm .primary')
   await p.waitForSelector('.hub-map')
   expect(await p.evaluate(() => document.documentElement.scrollWidth) <= 390, 'no horizontal scroll on phone')
   await phone.close()

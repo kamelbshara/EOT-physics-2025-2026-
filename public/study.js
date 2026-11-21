@@ -56,7 +56,6 @@ async function init(){
  const catalog=await api('catalog');cards=catalog.cards;profile=catalog.profile
  if(!profile?.school){$('name').value=profile?.name||$('name').value; if(!$('login').open)$('login').showModal();return}
  $('accountButton').hidden=false
- if(!profile.hasPin){setLoginMode('new');$('name').value=profile.name;$('school').value=profile.school;$('loginError').textContent=t('Choose a PIN so you can sign in on any device.','اختر رقمًا سريًا لتتمكن من الدخول من أي جهاز.');$('login').showModal();return}
  sessionStorage.setItem('physics-profile',JSON.stringify(profile))
  key='physics-practice-'+profile.startedAt
  try{cache=JSON.parse(localStorage.getItem(key)||'{}')}catch{cache={}}
@@ -85,10 +84,10 @@ $('tabNew').onclick=()=>setLoginMode('new');$('tabAccount').onclick=()=>setLogin
 $('loginForm').onsubmit=guard(async e=>{
  e.preventDefault()
  if(loginMode==='account'){
-  await api('login',{code:$('studentCode').value.trim(),pin:$('loginPin').value.trim()})
+  await api('login',{code:$('studentCode').value.trim(),name:$('loginName').value.trim()})
  }else{
-  const fresh=!profile?.hasPin
-  const saved=await api('profile',{name:$('name').value,school:$('school').value,pin:$('pin').value.trim(),classCode:$('classCode').value.trim()})
+  const fresh=!profile?.code
+  const saved=await api('profile',{name:$('name').value,school:$('school').value,classCode:$('classCode').value.trim()})
   if(fresh&&saved.code){$('login').close();showAccount(saved,true)}
  }
  if($('login').open)$('login').close()
@@ -96,7 +95,7 @@ $('loginForm').onsubmit=guard(async e=>{
 })
 function showAccount(p,justCreated=false){
  $('accountCode').textContent=p.code||'—'
- $('accountMeta').textContent=(justCreated?t('Write this code down with your PIN. ','اكتب هذا الرمز واحفظه مع رقمك السري. '):'')+(p.name||'')+(p.classCode?t(' · Class ',' · الصف ')+p.classCode:'')
+ $('accountMeta').textContent=(justCreated?t('Write this code down: you need it with your name to sign in on another device. ','احفظ هذا الرمز: تحتاجه مع اسمك للدخول من جهاز آخر. '):'')+(p.name||'')+(p.classCode?t(' · Class ',' · الصف ')+p.classCode:'')
  $('accountDialog').showModal()
 }
 $('accountButton').onclick=()=>profile&&showAccount(profile)

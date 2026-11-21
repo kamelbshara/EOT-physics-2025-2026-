@@ -88,8 +88,7 @@ async function studentDetail(view, id) {
   const manage = el('div', 'filters')
   const cls = el('select'); cls.append(new Option('بدون صف', '')); for (const c of classes) cls.append(new Option(c.name + ' · ' + c.code, c.code)); cls.value = s.classCode || ''
   cls.onchange = async () => { await api('student/class', { student: id, classCode: cls.value }); toast('تم تغيير الصف') }
-  const pin = el('input'); pin.placeholder = 'رقم سري جديد'; pin.inputMode = 'numeric'; pin.maxLength = 6
-  manage.append(el('label', '', 'الصف: '), cls, pin, btn('إعادة تعيين الرقم السري', async () => { await api('student/pin', { student: id, pin: pin.value }); pin.value = ''; toast('تم تعيين الرقم السري') }))
+  manage.append(el('label', '', 'الصف: '), cls)
   view.append(meta, manage)
   // mastery
   view.append(el('h2', '', 'خريطة الإتقان'))
