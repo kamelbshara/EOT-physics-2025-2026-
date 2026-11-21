@@ -83,11 +83,12 @@ export async function openNotebook({ api, question = null, pageId = null }) {
   }
 
   async function load(id) {
-    clearTimeout(saveTimer); await saving
+    if (saveTimer && sketch) { clearTimeout(saveTimer); saveTimer = null; saving = saving.then(save).catch(() => {}) }
+    await saving
     sketch?.destroy()
     page = id ? await api('notebook/page/' + id) : null
     let strokes = page?.strokes || []
-    try { const local = JSON.parse(localStorage.getItem(storeKey()) || 'null'); if (local && (!page || local.version >= page.version) && local.strokes.length >= strokes.length) strokes = local.strokes } catch {}
+    try { const local = JSON.parse(localStorage.getItem(storeKey()) || 'null'); if (local && (!page || local.version > page.version)) strokes = local.strokes } catch {}
     const layers = [{ name: 'student', strokes, editable: true }, { name: 'teacher', strokes: page?.review?.annotations || [], editable: false }]
     const background = page?.background || (question?.images?.length ? 'blank+figure:0' : 'grid')
     figureBox.checked = background.includes('+figure')
@@ -106,7 +107,7 @@ export async function openNotebook({ api, question = null, pageId = null }) {
     setSaved(t('Saving…', 'جارٍ الحفظ…'), 'busy')
     try { localStorage.setItem(storeKey(), JSON.stringify({ strokes: sketch.layers[0].strokes, version: (page?.version || 0) + 1 })) } catch {}
     clearTimeout(saveTimer)
-    saveTimer = setTimeout(() => { saving = saving.then(save).catch(() => setSaved(t('Offline · saved on this device', 'غير متصل · محفوظ على الجهاز'), 'warn')) }, 900)
+    saveTimer = setTimeout(() => { saveTimer = null; saving = saving.then(save).catch(() => setSaved(t('Offline · saved on this device', 'غير متصل · محفوظ على الجهاز'), 'warn')) }, 900)
   }
   async function save() {
     const strokes = sketch.layers[0].strokes

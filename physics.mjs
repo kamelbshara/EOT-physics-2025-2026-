@@ -84,7 +84,7 @@ export function physicsApi(db) {
     if (!db.prepare('PRAGMA table_info(physics_profiles)').all().some(c => c.name === column)) db.exec(`ALTER TABLE physics_profiles ADD COLUMN ${column} ${type}`)
   }
   db.exec('CREATE UNIQUE INDEX IF NOT EXISTS physics_profiles_code ON physics_profiles(code) WHERE code IS NOT NULL')
-  for (const [column, type] of [['test_id', 'TEXT'], ['title', 'TEXT']]) {
+  for (const [column, type] of [['test_id', 'TEXT'], ['title', 'TEXT'], ['logged', 'INTEGER']]) {
     if (!db.prepare('PRAGMA table_info(physics_mocks)').all().some(c => c.name === column)) db.exec(`ALTER TABLE physics_mocks ADD COLUMN ${column} ${type}`)
   }
   const studyView=db.prepare('SELECT 1 FROM physics_study_views WHERE student=? AND question=?')
@@ -110,6 +110,7 @@ export function physicsApi(db) {
     if (!row.done && Date.now() >= row.deadline) {
       db.prepare('UPDATE physics_mocks SET done=1 WHERE id=?').run(row.id)
       row.done=1
+      platform.logMock(row.student,row)
     }
     const answers=JSON.parse(row.answers)
     return { id:row.id,grade:row.grade,title:row.title||null,testId:row.test_id||null,answers,deadline:row.deadline,done:Boolean(row.done),
