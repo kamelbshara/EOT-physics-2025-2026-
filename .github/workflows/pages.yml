@@ -96,7 +96,7 @@ jobs:
           test "$(file -b --mime-type /tmp/photoelectric.png)" = image/png
           curl -fsSL --retry 3 "$SITE/math-input.js" -o /tmp/math-input.js
           grep -Fq 'mathlive.min.mjs' /tmp/math-input.js
-          grep -Fq 'الهيكل 100 مع استاذ احمد غرايبة' /tmp/physics-index
+          grep -Fq 'Haykal100 في الفيزياء مع استاذ احمد غرايبة' /tmp/physics-index
           curl -fsSL --retry 3 "$SITE/api-config.js" | grep -F "$API"
           curl -fsSL --retry 3 "$SITE/vendor/fx991ce/src/index.html" | grep -F 'fx-991CE X'
           for attempt in {1..36}; do
