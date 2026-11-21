@@ -10,7 +10,7 @@ export function changeLanguage() {
 export function applyLanguage() {
   document.documentElement.lang=language
   document.documentElement.dir=t('ltr','rtl')
-  document.title=t('Blueprint 100 · Advanced Physics','الهيكل 100 مع استاذ احمد غرايبة')
+  document.title=t('Haykal100 · Physics with Ahmad Gharaibeh','Haykal100 في الفيزياء مع استاذ احمد غرايبة')
   for(const el of document.querySelectorAll('[data-ar]')){
     el.dataset.en??=el.textContent
     el.textContent=t(el.dataset.en,el.dataset.ar)
