@@ -162,3 +162,33 @@ html[dir=rtl] .student-design .bookmarks button:hover{transform:translateX(4px)}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
+
+/* ── Automatic marking of written answers ─────────── */
+.student-design #result[data-verdict=partial]{border-inline-start-color:#c98a12;background:#fdf5e4}
+.student-design #result[data-verdict=incorrect]{border-inline-start-color:#c0453a;background:#fcecea}
+.student-design #result[data-verdict=correct]{border-inline-start-color:#1d7a4c;background:#e7f4ec}
+.grade-report{display:grid;gap:12px;margin:10px 0 14px}
+.grade-meter{display:flex;align-items:center;gap:12px}
+.grade-meter b{display:grid;place-items:center;width:58px;height:58px;border-radius:50%;font-size:15px;color:var(--ink);
+  background:radial-gradient(closest-side,#fff 74%,transparent 76% 100%),conic-gradient(var(--accent) var(--score),#e3e8e0 0)}
+.grade-meter span{font-weight:700;color:var(--muted)}
+.grade-items{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.grade-items li{display:grid;gap:3px;background:#fff;border:1px solid var(--line);border-inline-start:4px solid #c0453a;border-radius:10px;padding:9px 12px}
+.grade-items li[data-ok=yes]{border-inline-start-color:#1d7a4c}
+.grade-items li[data-ok=warn]{border-inline-start-color:#c98a12}
+.grade-items strong{font-size:14px}
+.grade-items span{font-size:13px;color:var(--muted)}
+.grade-items small{font-size:12.5px;color:#5b6a62;white-space:normal}
+.grade-report>p{margin:0;font-size:13px;color:var(--muted)}
+.compare-toggle{justify-self:start;border-radius:999px!important;background:var(--tint);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 35%,#fff)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.compare>div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.compare h4{margin:0 0 6px;font-size:13px;color:var(--accent);text-transform:uppercase;letter-spacing:.04em}
+.compare p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8}
+.compare mark{border-radius:4px;padding:0 2px;background:#d8f0df;color:#0f5132}
+.compare mark[data-m=miss]{background:#fde7c2;color:#7a4b00}
+.compare mark[data-m=warn]{background:#fde7c2;color:#7a4b00}
+.compare-legend{grid-column:1/-1;color:var(--muted)}
+.full-answer>summary{font-weight:700;color:var(--accent);cursor:pointer}
+.full-answer textarea{min-height:7em!important}
+@media(max-width:640px){.compare{grid-template-columns:1fr}}

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { DatabaseSync } from 'node:sqlite'
 import { fieldsFor } from '../lib/coach.mjs'
+import { grade, rubricFor } from '../lib/grader.mjs'
 import { conceptPractice } from '../public/worked/concept-practice.js'
 import sourceFigures from '../public/worked/source-figures.js'
 
@@ -53,4 +54,17 @@ for (const row of db.prepare('SELECT * FROM previous_questions').all()) {
   assert.equal(JSON.parse(row.data_json).id, row.id)
   assert.ok(!bank.has(row.id) && bank.has(row.replacement), row.id)
 }
-console.log('Verified 675 bilingual questions, their answer inputs, and all 80 blueprint rows.')
+// Automatic marking: every written item has a rubric, and its own worked solution earns full marks in either language.
+let written = 0
+for (const row of bank.values()) {
+  if (row.kind !== 'FRQ') continue
+  const q = { ...row, ...JSON.parse(row.data_json || '{}') }
+  const rubric = rubricFor(q)
+  assert.ok(rubric.numbers.length + rubric.ideas.length > 0, 'no marking rubric for ' + q.id)
+  for (const lang of ['en', 'ar']) {
+    const g = grade(q, { parts: [], text: q['solution_' + lang] + (lang === 'en' && !/see worked solution/i.test(q.answer) ? ' ' + q.answer : ''), latex: '' })
+    assert.equal(g.score, g.total, `${q.id}: the ${lang} worked solution scores ${g.score}/${g.total}`)
+  }
+  written++
+}
+console.log('Verified 675 bilingual questions, their answer inputs, all 80 blueprint rows and automatic marking for ' + written + ' written responses.')

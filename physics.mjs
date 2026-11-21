@@ -1,4 +1,5 @@
-import { fieldsFor, coach } from './lib/coach.mjs'
+import { fieldsFor, coach, unpack } from './lib/coach.mjs'
+import { grade } from './lib/grader.mjs'
 import { DatabaseSync } from 'node:sqlite'
 import { randomUUID } from 'node:crypto'
 import { readFileSync } from 'node:fs'
@@ -65,7 +66,7 @@ function solution(q, response) {
       advice = 'راجع بادئات الوحدات واكتب عامل التحويل قبل التعويض.'
     }
   }
-  return { correct:correct?.key, ar:q.solution_ar, en:q.solution_en, advice, adviceEn, coach:q.kind==='FRQ'?coach(q,response):null, images:pictures(q,'solution'), figureNotes:figureNotes(q,'solution') }
+  return { correct:correct?.key, ar:q.solution_ar, en:q.solution_en, advice, adviceEn, coach:q.kind==='FRQ'?coach(q,response):null, grade:q.kind==='FRQ'&&response?grade(q,unpack(response)):null, images:pictures(q,'solution'), figureNotes:figureNotes(q,'solution') }
 }
 
 export function physicsApi(db) {

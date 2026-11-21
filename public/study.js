@@ -195,8 +195,8 @@ function lesson(){
  $('notice').textContent='';$('dashboard').hidden=true;$('lesson').hidden=false
  document.body.dataset.grade=inMock?mock.grade:current.grade
  $('unit').textContent=inMock?t('Mock exam · Grade ','اختبار تجريبي · الصف ')+mock.grade:current.id+t(' · Student book pp. ',' · صفحات الكتاب ')+current.bookPages.replaceAll(';',t(', ','، '))
- const auto=inMock&&mock.done?items.filter(i=>i.kind==='MCQ'):[]
- $('title').textContent=inMock?(mock.done?t('Mock review · ','مراجعة الاختبار · ')+auto.filter(i=>mock.answers[i.id]===i.review.correct).length+'/'+auto.length+t(' multiple choice',' اختيار من متعدد'):t('Mock exam','اختبار الهيكل')):current[lang()]
+ const points=inMock&&mock.done?items.reduce((sum,i)=>sum+(i.kind==='MCQ'?(mock.answers[i.id]===i.review.correct?1:0):(i.review?.grade?.total?i.review.grade.score/i.review.grade.total:0)),0):0
+ $('title').textContent=inMock?(mock.done?t('Mock review · ','مراجعة الاختبار · ')+(Math.round(points*10)/10)+'/'+items.length+t(' · multiple choice and written marked automatically',' · الاختيار من متعدد والمقالي مصحّحان تلقائيًا'):t('Mock exam','اختبار الهيكل')):current[lang()]
  $('nav').replaceChildren(...items.map((v,n)=>{const b=button(n+1,()=>{index=n;lesson()});b.setAttribute('aria-pressed',n===index);b.classList.toggle('chip-done',inMock?!!mock.answers[v.id]:!!cache[v.id]?.checked);return b}))
  $('meta').textContent=(q.kind==='MCQ'?t('Multiple choice','اختيار من متعدد'):t('Written response','إجابة مكتوبة'))+' · '+(index+1)+' / '+items.length
  $('wm').innerHTML=questionWatermark()
@@ -258,6 +258,7 @@ function showReview(q,r,answer,studyOnly=false){
  const draft=parseDraft(answer)
  const exact=r.coach?.exact && !draft.parts.some(part=>part?.value?.trim())
  const states=answered && !exact ? r.coach?.parts||[] : []
+ const g=answered && q.kind==='FRQ' ? r.grade : null
  const partLabels={
   correct:t('Correct','صحيح'),incorrect:t('Incorrect','خطأ'),
   empty:t('Unanswered','دون إجابة'),review:t('Review','للمراجعة')
@@ -277,6 +278,9 @@ function showReview(q,r,answer,studyOnly=false){
    if(radio.value===r.correct)markAnswer(radio.parentElement,'correct',t('Correct answer','الإجابة الصحيحة'))
    else if(radio.value===answer)markAnswer(radio.parentElement,'incorrect',t('Incorrect choice','اختيار خاطئ'))
   }
+ }else if(g && g.total && !exact){
+  verdict=g.verdict==='correct'?'correct':g.verdict==='partial'?'partial':'incorrect'
+  title=(verdict==='correct'?t('Correct answer','إجابة صحيحة'):verdict==='partial'?t('Partly correct','إجابة صحيحة جزئيًا'):t('Not correct yet','الإجابة غير صحيحة بعد'))+' · '+g.score+'/'+g.total
  }else if(exact || (states.length && states.every(code=>code==='correct'))){
   verdict='correct'
   title=exact?t('Your answer matches the model','إجابتك تطابق الحل النموذجي'):t('All short answers are correct','كل الإجابات القصيرة صحيحة')
@@ -287,6 +291,7 @@ function showReview(q,r,answer,studyOnly=false){
  out.dataset.verdict=verdict
  out.hidden=false
  out.replaceChildren(element('h3',title))
+ if(g && g.total && !exact)out.append(gradeReport(g))
  const step=(heading,body)=>{
   const block=element('section');block.className='coach-step'
   const p=element('p');writePhysicsText(p,body)
@@ -311,7 +316,15 @@ function showReview(q,r,answer,studyOnly=false){
   term:t('Compare your term with the definition. Other wording can be reviewed against the model.','قارن مصطلحك بالتعريف. راجع الصياغات البديلة مع الحل النموذجي.')
  }
  const lines=$('inputs').querySelectorAll('.answer-line')
- states.forEach((code,i)=>{
+ if(g?.total){
+  // boxes follow the automatic grade, so an answer written in the full-answer box also marks them
+  const numbers=g.items.filter(item=>item.type==='number')
+  lines.forEach((line,i)=>{
+   const item=numbers.length===lines.length?numbers[i]:null
+   if(item)markAnswer(line,item.ok?'correct':'incorrect',item.ok?partLabels.correct:partLabels.incorrect)
+   else if(states[i] && states[i]!=='empty')markAnswer(line,partVerdict(states[i],i),partLabels[partVerdict(states[i],i)])
+  })
+ }else states.forEach((code,i)=>{
   const state=partVerdict(code,i)
   markAnswer(lines[i],state,partLabels[state])
   step(q.fields[i]?.[lang()]||t('Answer ','الإجابة ')+(i+1),messages[code])
@@ -343,6 +356,38 @@ function showReview(q,r,answer,studyOnly=false){
  function labelToggle(){toggle.textContent=ideal.hidden?t('Show full worked solution','إظهار الحل النموذجي الكامل'):t('Hide worked solution','إخفاء الحل النموذجي');toggle.setAttribute('aria-expanded',!ideal.hidden)}
  labelToggle();out.append(toggle,ideal)
 
+}
+// Automatic marking report for a written response: score, one line per rubric item and a side-by-side comparison.
+function gradeReport(g){
+ const box=element('section');box.className='grade-report'
+ const meter=element('div');meter.className='grade-meter';meter.style.setProperty('--score',Math.round(100*g.score/g.total)+'%')
+ meter.append(element('b',Math.round(100*g.score/g.total)+'%'),element('span',t(g.score+' of '+g.total+' marking points',g.score+' من '+g.total+' نقاط تصحيح')))
+ const list=element('ul');list.className='grade-items'
+ const numberMsg={correct:t('Correct','صحيح'),sign:t('Right size, wrong sign or direction','المقدار صحيح والإشارة أو الاتجاه خطأ'),scale:t('Check the power of ten or the unit conversion','راجع أسّ العشرة أو تحويل الوحدة'),unit:t('The number fits but the unit is of the wrong kind','الرقم مناسب لكن نوع الوحدة خطأ'),missing:t('This result is missing or incorrect','هذه النتيجة غير موجودة أو غير صحيحة')}
+ const ideaMsg={correct:t('Included','مذكورة'),opposite:t('Your answer states the opposite idea','إجابتك تذكر الفكرة المعاكسة'),missing:t('This key idea is missing','هذه الفكرة الأساسية غير مذكورة')}
+ let n=0,k=0
+ for(const item of g.items){
+  const li=element('li');li.dataset.ok=item.ok?'yes':item.code==='missing'?'no':'warn'
+  const label=item.type==='number'?t('Result ','النتيجة ')+(++n)+(item.unit?' ('+item.unit+')':''):t('Key idea ','فكرة أساسية ')+(++k)
+  const head=element('strong',(item.ok?'✓ ':'✗ ')+label)
+  const msg=element('span',item.type==='number'?numberMsg[item.code]+(item.unitMissing?t(' · add the unit',' · اكتب الوحدة'):''):ideaMsg[item.code])
+  li.append(head,msg)
+  const hint=item[lang()]
+  if(!item.ok && hint && hint!=='_____'){const p=element('small');writePhysicsText(p,t('From the model: ','من الحل النموذجي: ')+hint);li.append(p)}
+  list.append(li)
+ }
+ box.append(meter,list)
+ if(g.drawing)box.append(element('p',t('Drawings are not marked automatically. Compare your sketch with the worked solution figure.','الرسم لا يُصحَّح تلقائيًا؛ قارن رسمك بشكل الحل النموذجي.')))
+ if(g.compare){
+  const panel=element('div');panel.className='compare';panel.hidden=true
+  const column=(heading,segs,dir)=>{const col=element('div');col.dir=dir;col.append(element('h4',heading));const p=element('p');for(const seg of segs){if(seg.m){const m=element('mark',seg.t);m.dataset.m=seg.m;p.append(m)}else p.append(document.createTextNode(seg.t))}col.append(p);return col}
+  panel.append(column(t('Your answer','إجابتك'),g.compare.student,'auto'),column(t('Worked solution','الحل النموذجي'),g.compare[lang()],t('ltr','rtl')))
+  const legend=element('small',t('Green: matched · Amber: in the model but missing from your answer','الأخضر: متطابق · الكهرماني: موجود في الحل وغير موجود في إجابتك'));legend.className='compare-legend';panel.append(legend)
+  const toggle=button(t('Compare my answer with the model','قارن إجابتي بالحل النموذجي'),()=>{panel.hidden=!panel.hidden;toggle.setAttribute('aria-expanded',!panel.hidden)})
+  toggle.className='compare-toggle';toggle.setAttribute('aria-expanded','false')
+  box.append(toggle,panel)
+ }
+ return box
 }
 $('walkthrough').onclick=guard(async()=>{
  const q=items[index]
