@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "echo \"No dependencies to install\"",
+  "buildCommand": "node scripts/build-pages.mjs",
+  "outputDirectory": "dist/pages",
+  "headers": [
+    { "source": "/(.*)", "headers": [
+      { "key": "X-Content-Type-Options", "value": "nosniff" },
+      { "key": "Referrer-Policy", "value": "same-origin" }
+    ] }
+  ]
+}
