@@ -74,3 +74,5 @@ tr.clickable{cursor:pointer}tr.clickable:hover td{background:color-mix(in srgb,v
 .sketch-scroll{width:100%}
 .review-side,.nb-side{grid-template-columns:minmax(0,1fr)}
 .review-side>*{min-width:0;max-width:100%}
+.brand-mark{width:46px;height:46px;object-fit:contain;flex:none}
+.login-logo{display:block;width:170px;height:auto;margin:0 auto 6px}
