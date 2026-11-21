@@ -9,7 +9,8 @@ const WIDTHS = [2, 4, 8]
 function node(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n }
 
 // layers: [{ name, strokes, editable, color }]; the editable layer receives new ink.
-export function createSketchpad(host, { layers, background = 'blank', figureUrl = null, onChange = () => {}, toolbar = true } = {}) {
+// question: { text, options: [string], dir } is printed at the top of the page when the background carries +question
+export function createSketchpad(host, { layers, background = 'blank', figureUrl = null, question = null, onChange = () => {}, toolbar = true } = {}) {
   const state = { tool: 'pen', color: layers.find(l => l.editable)?.color || COLORS[0], width: 1, zoom: 1, penOnly: false, background, figure: null, replaying: false }
   const editable = layers.find(l => l.editable) || null
   const undo = [], redo = []
@@ -108,11 +109,55 @@ export function createSketchpad(host, { layers, background = 'blank', figureUrl 
       ctx.beginPath(); ctx.moveTo(ox, 60); ctx.lineTo(ox, oy); ctx.lineTo(PAGE_W - 60, oy); ctx.stroke()
       arrowHead(ox, 80, ox, 60, '#6d7f76', 2); arrowHead(PAGE_W - 80, oy, PAGE_W - 60, oy, '#6d7f76', 2)
     }
+    let top = 30
+    if (question && state.background.includes('+question')) top = drawQuestion() + 20
     if (state.figure) {
       const img = state.figure, w = Math.min(PAGE_W - 80, img.naturalWidth * 1.4), h = w * img.naturalHeight / img.naturalWidth
-      ctx.drawImage(img, (PAGE_W - w) / 2, 30, w, Math.min(h, PAGE_H * 0.55))
+      if (!state.background.includes('+question')) {
+        // pages saved before the printed question keep their original figure geometry, so existing ink stays aligned
+        ctx.drawImage(img, (PAGE_W - w) / 2, 30, w, Math.min(h, PAGE_H * 0.55))
+      } else {
+        const fh = Math.min(h, PAGE_H * 0.5), fw = fh < h ? fh * img.naturalWidth / img.naturalHeight : w
+        ctx.drawImage(img, (PAGE_W - fw) / 2, top, fw, fh)
+      }
     }
     ctx.restore()
+  }
+  // The question in a shaded box at the top of the page; returns the y where the box ends.
+  function drawQuestion() {
+    const rtl = question.dir === 'rtl', pad = 24, x0 = 30, width = PAGE_W - 60, size = 24, lh = 36
+    ctx.save()
+    ctx.font = `600 ${size}px 'Student Arabic', Inter, 'Segoe UI', Arial, sans-serif`
+    ctx.direction = rtl ? 'rtl' : 'ltr'; ctx.textAlign = rtl ? 'right' : 'left'; ctx.textBaseline = 'top'
+    const wrap = (text, max) => {
+      const lines = []
+      for (const para of String(text || '').split(/\n+/)) {
+        let line = ''
+        for (const word of para.split(/\s+/).filter(Boolean)) {
+          const next = line ? line + ' ' + word : word
+          if (ctx.measureText(next).width > max && line) { lines.push(line); line = word } else line = next
+        }
+        if (line) lines.push(line)
+      }
+      return lines
+    }
+    const lines = wrap(question.text, width - pad * 2).slice(0, 12)
+    ctx.font = `500 ${size - 2}px 'Student Arabic', Inter, 'Segoe UI', Arial, sans-serif`
+    const opts = (question.options || []).flatMap(o => wrap(o, width - pad * 2 - 20)).slice(0, 10)
+    const height = pad * 2 + lines.length * lh + (opts.length ? 10 + opts.length * (lh - 4) : 0)
+    ctx.fillStyle = '#f2f7ef'; ctx.strokeStyle = '#b9d3c4'; ctx.lineWidth = 2
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x0, 20, width, height, 14) : ctx.rect(x0, 20, width, height); ctx.fill(); ctx.stroke()
+    ctx.fillStyle = '#0f7b5f'; ctx.fillRect(rtl ? x0 + width - 6 : x0, 20, 6, height)
+    const tx = rtl ? x0 + width - pad : x0 + pad
+    let y = 20 + pad
+    ctx.fillStyle = '#10302a'; ctx.font = `600 ${size}px 'Student Arabic', Inter, 'Segoe UI', Arial, sans-serif`
+    for (const l of lines) { ctx.fillText(l, tx, y); y += lh }
+    if (opts.length) {
+      y += 10; ctx.fillStyle = '#304a42'; ctx.font = `500 ${size - 2}px 'Student Arabic', Inter, 'Segoe UI', Arial, sans-serif`
+      for (const l of opts) { ctx.fillText(l, rtl ? tx - 20 : tx + 20, y); y += lh - 4 }
+    }
+    ctx.restore()
+    return 20 + height
   }
   function arrowHead(x1, y1, x2, y2, color, w) {
     const a = Math.atan2(y2 - y1, x2 - x1), l = 14 + w * 2
@@ -250,6 +295,8 @@ export function createSketchpad(host, { layers, background = 'blank', figureUrl 
   }
 
   resize()
+  // the question text uses the page font, which may still be loading
+  if (question && document.fonts?.ready) document.fonts.ready.then(() => render())
   return {
     element: root,
     get background() { return state.background },

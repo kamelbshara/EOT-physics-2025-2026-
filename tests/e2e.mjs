@@ -56,6 +56,7 @@ await step('multiple choice is marked and queued as a mistake', async () => {
   await sp.locator('.paper label').nth(2).click(); await sp.click('#check')
   await sp.waitForSelector('#result:not([hidden])')
   expect(/Incorrect|خاطئة/.test(await sp.textContent('#result h3')), 'incorrect verdict')
+  expect(await sp.isHidden('#manual'), 'no calculator guide on a conceptual question')
 })
 await step('hint ladder opens two levels', async () => {
   await sp.click('#hint'); await sp.click('.hint-more')
@@ -63,6 +64,7 @@ await step('hint ladder opens two levels', async () => {
 })
 await step('notebook: draw, autosave and send to the teacher', async () => {
   await sp.click('#notebookBtn'); await sp.waitForSelector('.notebook-dialog[open] .sketch-canvas')
+  expect(await sp.isChecked('.nb-figure input >> nth=0'), 'question printed on a new page')
   const c = await sp.locator('.sketch-canvas').boundingBox()
   await sp.mouse.move(c.x + 60, c.y + 60); await sp.mouse.down()
   for (let i = 0; i < 15; i++) await sp.mouse.move(c.x + 60 + i * 10, c.y + 60 + i * 4)
@@ -80,6 +82,7 @@ await step('student asks the teacher', async () => {
 await step('written answer is marked automatically', async () => {
   await sp.click('#back'); await sp.click('#gradeTabs button:nth-child(4)')
   await sp.click('#cards .kpi >> nth=17'); await sp.waitForSelector('.full-answer textarea')
+  expect(await sp.isVisible('#manual'), 'calculator guide on a numerical question')
   await sp.fill('.full-answer textarea', 'v = 2 m/s, KE before 16 J and after 8 J, so 8 J is converted. Perfectly inelastic; momentum conserved.')
   await sp.click('#check'); await sp.waitForSelector('.grade-report')
   await sp.click('.compare-toggle'); await sp.waitForSelector('.compare:not([hidden]) mark')

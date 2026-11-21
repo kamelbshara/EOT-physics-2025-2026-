@@ -34,6 +34,10 @@ export async function openNotebook({ api, question = null, pageId = null }) {
   const figureBox = el('input'); figureBox.type = 'checkbox'
   figureToggle.append(figureBox, el('span', '', t('Question figure', 'صورة السؤال')))
   figureToggle.hidden = !question?.images?.length
+  const questionToggle = el('label', 'nb-figure')
+  const questionBox = el('input'); questionBox.type = 'checkbox'
+  questionToggle.append(questionBox, el('span', '', t('Question on page', 'السؤال على الصفحة')))
+  questionToggle.hidden = !question
   const actions = el('div', 'nb-actions')
   const submit = btn(t('Send to teacher', 'أرسل للمعلم'), () => submitPage(), 'primary')
   actions.append(
@@ -43,7 +47,7 @@ export async function openNotebook({ api, question = null, pageId = null }) {
     btn(t('Close', 'إغلاق'), () => close()))
   const pagesBox = el('div', 'nb-pages')
   pagesBox.append(pageSelect, btn('+ ' + t('New page', 'صفحة جديدة'), () => load(null)))
-  head.append(title, pagesBox, figureToggle, status, saved, actions)
+  head.append(title, pagesBox, questionToggle, figureToggle, status, saved, actions)
   const body = el('div', 'nb-body')
   const surface = el('div', 'nb-surface')
   const side = el('aside', 'nb-side')
@@ -90,16 +94,23 @@ export async function openNotebook({ api, question = null, pageId = null }) {
     let strokes = page?.strokes || []
     try { const local = JSON.parse(localStorage.getItem(storeKey()) || 'null'); if (local && (!page || local.version > page.version)) strokes = local.strokes } catch {}
     const layers = [{ name: 'student', strokes, editable: true }, { name: 'teacher', strokes: page?.review?.annotations || [], editable: false }]
-    const background = page?.background || (question?.images?.length ? 'blank+figure:0' : 'grid')
+    // a new page starts with the question printed at the top, so the student solves under it and the teacher can mark over it
+    const background = page?.background || (question ? (question.images?.length ? 'blank+question:' + lang() + '+figure:0' : 'grid+question:' + lang()) : 'grid')
     figureBox.checked = background.includes('+figure')
+    questionBox.checked = background.includes('+question')
+    // the page keeps the language its question was printed in, so ink stays aligned with the text for the teacher too
+    let qlang = (background.match(/\+question:(ar|en)/) || [])[1] || lang()
+    const printedIn = l => question ? { text: question[l] || question.en || question.ar, options: (question.options || []).map(o => o.key + ' · ' + (o[l] || o.en || o.ar)), dir: l === 'ar' ? 'rtl' : 'ltr' } : null
+    let printed = printedIn(qlang)
     const figureUrl = question?.images?.length ? apiOrigin + '/api/figure/' + question.id + '/question/0' : null
     const make = bg => {
       sketch?.destroy()
-      sketch = createSketchpad(surface, { layers, background: bg, figureUrl: bg.includes('+figure') ? figureUrl : null, onChange: () => schedule() })
+      sketch = createSketchpad(surface, { layers, background: bg, figureUrl: bg.includes('+figure') ? figureUrl : null, question: printed, onChange: () => schedule() })
       sketch.layers = layers
     }
     make(background)
-    figureBox.onchange = () => { make(sketch.background.split('+')[0] + (figureBox.checked ? '+figure:0' : '')); schedule() }
+    const flags = () => { if (questionBox.checked && !sketch.background.includes('+question')) { qlang = lang(); printed = printedIn(qlang) } return sketch.background.split('+')[0] + (questionBox.checked ? '+question:' + qlang : '') + (figureBox.checked ? '+figure:0' : '') }
+    figureBox.onchange = questionBox.onchange = () => { make(flags()); schedule() }
     fillPages(); renderSide()
     setSaved(page ? t('Saved', 'محفوظ') : '', 'ok')
   }
@@ -141,7 +152,7 @@ export async function openNotebookList({ api }) {
     const open = btn((p.question || t('Free page', 'صفحة حرة')) + ' · ' + statusLabel(p.status) + (p.unread ? ' · ' + t('new note', 'ملاحظة جديدة') : ''), async () => {
       d.close()
       const full = await api('notebook/page/' + p.id)
-      const q = full.questionText ? { id: full.question, en: full.questionText.en, ar: full.questionText.ar, images: Array.from({ length: full.questionText.figures }) } : null
+      const q = full.questionText ? { id: full.question, en: full.questionText.en, ar: full.questionText.ar, options: full.questionText.options || [], images: Array.from({ length: full.questionText.figures }) } : null
       await openNotebook({ api, pageId: p.id, question: q })
     })
     li.append(open, el('small', '', when(p.updated))); list.append(li)
