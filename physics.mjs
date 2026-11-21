@@ -1,5 +1,5 @@
 import { fieldsFor, coach, unpack } from './lib/coach.mjs'
-import { grade } from './lib/grader.mjs'
+import { grade, rubricFor } from './lib/grader.mjs'
 import { platformApi } from './lib/platform.mjs'
 import { DatabaseSync } from 'node:sqlite'
 import { randomUUID } from 'node:crypto'
@@ -48,8 +48,23 @@ function practiceOrder(rows){
  }
  return result
 }
+// Only questions solved with a calculator show the calculator guide:
+// written answers whose rubric has a numerical result, and multiple choice with mostly numerical options and given data.
+const calcCache=new Map()
+function needsCalculator(q){
+  if(calcCache.has(q.id))return calcCache.get(q.id)
+  let calc
+  if(q.kind==='FRQ')calc=rubricFor(q).numbers.some(n=>n.value!==0)
+  else{
+    const numeric=(q.options||[]).filter(o=>/\d/.test(o.en)&&!/^[A-D]$/.test(o.en.trim())).length
+    const data=/\d/.test(q.question_en.replace(/\b(?:Figure|Fig\.|Table|Row)\s*\d+/gi,''))||(q.images||[]).some(i=>i.role==='question')
+    calc=numeric>=Math.max(2,Math.ceil((q.options||[]).length*0.75))&&data
+  }
+  calcCache.set(q.id,calc)
+  return calc
+}
 function prompt(q,allowGap=true) {
-  return { id:q.id, lo:q.lo_id, kind:q.kind, ar:q.question_ar, en:q.question_en, options:q.options, fields:q.kind==='FRQ'?fieldsFor(q,allowGap):[], images:pictures(q,'question'), figureNotes:figureNotes(q,'question'), stimulus:q.stimulus }
+  return { id:q.id, calc:needsCalculator(q), lo:q.lo_id, kind:q.kind, ar:q.question_ar, en:q.question_en, options:q.options, fields:q.kind==='FRQ'?fieldsFor(q,allowGap):[], images:pictures(q,'question'), figureNotes:figureNotes(q,'question'), stimulus:q.stimulus }
 }
 function solution(q, response) {
   const selected = q.options.find(o => o.key === response)
