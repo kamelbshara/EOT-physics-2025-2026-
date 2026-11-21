@@ -3,19 +3,20 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Teacher Dashboard · Haykal100</title>
+<link rel="icon" type="image/png" href="./brand/favicon.png"><link rel="apple-touch-icon" href="./brand/apple-touch-icon.png"><meta name="theme-color" content="#0a2f28">
 <link rel="stylesheet" href="./admin.css">
 <script type="module" src="./admin.js"></script>
 </head>
 <body>
 <main id="app">
   <section id="loginView" class="login-card" hidden>
-    <b class="symbol" aria-hidden="true">Φ</b>
+    <picture><source srcset="./brand/logo-full-dark.webp" media="(prefers-color-scheme: dark)"><img class="login-logo" src="./brand/logo-full.webp" alt="الهيكل 100 · أساس المعرفة والنمو" width="402" height="480"></picture>
     <h1>لوحة المعلم</h1>
     <p>Haykal100 · في الفيزياء مع استاذ احمد غرايبة</p>
     <form id="adminLogin"><label>كلمة مرور المعلم<input id="adminPassword" type="password" autocomplete="current-password" required></label><p id="adminError" role="alert"></p><button class="primary">دخول</button></form>
   </section>
   <section id="shell" hidden>
-    <header class="top"><b class="symbol" aria-hidden="true">Φ</b><div><strong>لوحة المعلم</strong><small>Haykal100 · في الفيزياء مع استاذ احمد غرايبة</small></div>
+    <header class="top"><img class="brand-mark" src="./brand/logo-mark.webp" alt="" width="46" height="46"><div><strong>لوحة المعلم</strong><small>Haykal100 · في الفيزياء مع استاذ احمد غرايبة</small></div>
       <nav id="tabs" aria-label="أقسام اللوحة"></nav><button id="adminLogout">خروج</button></header>
     <div id="view"></div>
   </section>
