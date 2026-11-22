@@ -2,7 +2,7 @@ import { StringDecoder } from 'node:string_decoder'
 import { createServer } from 'node:http'
 import { randomUUID } from 'node:crypto'
 import { mkdirSync, readFileSync } from 'node:fs'
-import { DatabaseSync } from 'node:sqlite'
+import { openDatabase } from './lib/db.mjs'
 import { pathToFileURL } from 'node:url'
 import { physicsApi } from './physics.mjs'
 import { readdirSync } from 'node:fs'
@@ -11,9 +11,13 @@ import { fileURLToPath } from 'node:url'
 import { scheduleBackups } from './lib/backup.mjs'
 
 const data = new URL('./data/', import.meta.url)
-mkdirSync(data, { recursive: true })
-const db = new DatabaseSync(process.env.PHYSICS_DB || new URL('practice.sqlite', data))
-db.exec('PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;')
+// Neon Postgres when DATABASE_URL is set (shared with the maths platform, every table prefixed physics_);
+// otherwise a local SQLite file for development and tests
+const onNeon = Boolean(process.env.DATABASE_URL)
+if (!onNeon && !process.env.PHYSICS_DB && !process.env.VERCEL) mkdirSync(data, { recursive: true })
+// a Vercel preview without DATABASE_URL gets a throwaway SQLite file in /tmp (the only writable folder there)
+const sqlitePath = process.env.PHYSICS_DB || (process.env.VERCEL ? '/tmp/practice.sqlite' : fileURLToPath(new URL('practice.sqlite', data)))
+const db = await openDatabase({ sqlitePath })
 const assets = new Map([
   ['/', ['index.html', 'text/html']],
 ])
@@ -100,5 +104,5 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   // daily backups beside the database unless PHYSICS_BACKUP_DIR says otherwise; PHYSICS_BACKUP_HOURS=0 turns them off
   const dbFile = process.env.PHYSICS_DB || fileURLToPath(new URL('practice.sqlite', data))
   const hours = Number(process.env.PHYSICS_BACKUP_HOURS ?? 24)
-  if (hours > 0) scheduleBackups(db, process.env.PHYSICS_BACKUP_DIR || join(dirname(dbFile), 'backups'), hours)
+  if (hours > 0 && db.kind === 'sqlite') scheduleBackups(db.raw, process.env.PHYSICS_BACKUP_DIR || join(dirname(dbFile), 'backups'), hours)
 }

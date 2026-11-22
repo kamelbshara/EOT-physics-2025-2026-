@@ -1,9 +1,14 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "echo \"No dependencies to install\"",
-  "buildCommand": "node scripts/build-pages.mjs",
+  "buildCommand": "PHYSICS_SAME_ORIGIN=1 node scripts/build-pages.mjs",
   "outputDirectory": "dist/pages",
+  "functions": {
+    "api/index.mjs": { "includeFiles": "{bank,public,lib}/**", "maxDuration": 30 }
+  },
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index" }
+  ],
   "headers": [
     { "source": "/(.*)", "headers": [
       { "key": "X-Content-Type-Options", "value": "nosniff" },

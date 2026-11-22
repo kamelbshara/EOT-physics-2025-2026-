@@ -48,13 +48,21 @@ See [the bank review](BANK_REVIEW.md) and [the per-outcome coverage and worked-e
 
 A student check-in expires after 24 hours. Returning students check in again on the same browser to continue their saved work. The question bank itself stays read-only; teacher edits (marks, rubrics, classes, tests, reviews) are stored in the progress database.
 
-## Vercel
+## Database (Neon, shared with the maths platform)
 
-A second copy of the student interface and teacher dashboard is published at https://haykal100.vercel.app. Vercel builds it from `main` using `vercel.json` and the project variable `PHYSICS_API_ORIGIN`. It is a static frontend, like GitHub Pages, and both copies use the same Railway server and database. The server accepts cross-origin requests from GitHub Pages and from `https://haykal100.vercel.app`; `PHYSICS_PAGES_ORIGIN` can list more origins, separated by commas.
+When `DATABASE_URL` is set, all student data lives in Neon Postgres, in the same database as the maths platform (eot2026-2027). Every physics table starts with `physics_` (`physics_profiles`, `physics_progress`, `physics_mocks`, `physics_notebook`, ...) so the two subjects never mix; the maths tables are to carry a `math_` prefix. The tables are created automatically on first start. Without `DATABASE_URL` the server uses a local SQLite file, which is what development and the end-to-end tests use (`DATABASE_URL=... npm run test:e2e` runs the same tests against Neon). The code talks to both through one asynchronous layer in `lib/db.mjs`.
+
+To bring over data from an old SQLite file (for example a backup of the Railway volume):
+
+    DATABASE_URL=postgres://... node scripts/migrate-sqlite-to-neon.mjs practice.sqlite
+
+## Vercel (frontend and API)
+
+https://haykal100.vercel.app serves the student interface, the teacher dashboard and the API together: `api/index.mjs` runs the same handler as `server.mjs` as a Vercel Function, and `vercel.json` sends every `/api/*` request to it. Vercel builds from `main` with `PHYSICS_SAME_ORIGIN=1`, so the pages call the API on the same site. Project variables: `DATABASE_URL` (Neon production branch) and `PHYSICS_TEACHER_PASSWORD` (teacher sign-in). The server also accepts cross-origin requests from GitHub Pages; `PHYSICS_PAGES_ORIGIN` can list more origins, separated by commas.
 
 ## GitHub Pages
 
-The Pages workflow builds the student interface under the repository's project path. It publishes only files from `public/`. The Node service continues to serve private figures, grading and SQLite progress.
+The Pages workflow builds the student interface under the repository's project path. It publishes only files from `public/`. Its pages call the API at `PHYSICS_API_ORIGIN` (default `https://haykal100.vercel.app`), which serves figures, grading and progress.
 
 Deploy this repository's Node server on an HTTPS origin with a persistent disk for `PHYSICS_DB`. Its default allowed frontend origin is `https://kamelbshara.github.io`; for a custom Pages domain, set `PHYSICS_PAGES_ORIGIN` on the server. The separate frontend uses secure partitioned cookies in compatible browsers.
 
