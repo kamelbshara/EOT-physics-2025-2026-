@@ -190,6 +190,15 @@ export function physicsApi(db) {
       }
       return reply(200,await mockView(await getMock.get(student)))
     }
+    // Reset (teacher request 2026-11-22): the student starts the questions again. Saved answers move to an archive the
+    // teacher can still read; attempts, mastery, streak, points and badges stay, because they are the student's record.
+    if(path==='/api/reset' && req.method==='POST'){
+      const now=Date.now()
+      await db.prepare('INSERT INTO physics_progress_archive(student,question,response,checked,reset_at) SELECT student,question,response,checked,? FROM physics_progress WHERE student=?').run(now,student)
+      const cleared=(await db.prepare('DELETE FROM physics_progress WHERE student=?').run(student)).changes
+      await db.prepare('DELETE FROM physics_study_views WHERE student=?').run(student)
+      return reply(200,{cleared})
+    }
     if(path==='/api/walkthrough' && req.method==='POST'){
       const q=typeof body.id==='string' && question(body.id)
       if(!q)return reply(404,{error:'غير متاح'})
