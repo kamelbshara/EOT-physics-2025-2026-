@@ -85,61 +85,47 @@ function solution(q, response) {
   return { correct:correct?.key, ar:q.solution_ar, en:q.solution_en, advice, adviceEn, coach:q.kind==='FRQ'?coach(q,response):null, grade:q.kind==='FRQ'&&response?grade(q,unpack(response)):null, images:pictures(q,'solution'), figureNotes:figureNotes(q,'solution') }
 }
 
+// db is the asynchronous adapter from lib/db.mjs (Neon Postgres or SQLite); the question bank stays a read-only SQLite file.
 export function physicsApi(db) {
-  db.exec(`CREATE TABLE IF NOT EXISTS physics_profiles(student TEXT PRIMARY KEY,name TEXT NOT NULL,started TEXT NOT NULL);
-    CREATE TABLE IF NOT EXISTS physics_progress(student TEXT, question TEXT, response TEXT, checked INTEGER, PRIMARY KEY(student,question));
-    CREATE TABLE IF NOT EXISTS physics_mocks(id TEXT PRIMARY KEY,student TEXT,grade INTEGER,ids TEXT,answers TEXT,deadline INTEGER,done INTEGER);`)
-  db.exec('CREATE TABLE IF NOT EXISTS physics_visits(student TEXT PRIMARY KEY, expires INTEGER NOT NULL)')
-  if (!db.prepare('PRAGMA table_info(physics_profiles)').all().some(column => column.name === 'school')) {
-    db.exec("ALTER TABLE physics_profiles ADD COLUMN school TEXT NOT NULL DEFAULT ''")
-  }
-  db.exec('CREATE TABLE IF NOT EXISTS physics_study_views(student TEXT, question TEXT, PRIMARY KEY(student,question))')
-  // Simple accounts: a six-digit student code plus a PIN lets a student continue on any device.
-  for (const [column, type] of [['code', 'TEXT'], ['pin', 'TEXT'], ['class_code', 'TEXT']]) {
-    if (!db.prepare('PRAGMA table_info(physics_profiles)').all().some(c => c.name === column)) db.exec(`ALTER TABLE physics_profiles ADD COLUMN ${column} ${type}`)
-  }
-  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS physics_profiles_code ON physics_profiles(code) WHERE code IS NOT NULL')
-  for (const [column, type] of [['test_id', 'TEXT'], ['title', 'TEXT'], ['logged', 'INTEGER']]) {
-    if (!db.prepare('PRAGMA table_info(physics_mocks)').all().some(c => c.name === column)) db.exec(`ALTER TABLE physics_mocks ADD COLUMN ${column} ${type}`)
-  }
-  const studyView=db.prepare('SELECT 1 FROM physics_study_views WHERE student=? AND question=?')
-  const activeVisit=db.prepare('SELECT 1 FROM physics_visits WHERE student=? AND expires>?')
-  const profile = db.prepare('SELECT name,school,started AS startedAt,code,class_code AS classCode FROM physics_profiles WHERE student=?')
+  const studyView=db.prepare('SELECT 1 AS x FROM physics_study_views WHERE student=? AND question=?')
+  const activeVisit=db.prepare('SELECT 1 AS x FROM physics_visits WHERE student=? AND expires>?')
+  const profile = db.prepare('SELECT name,school,started AS "startedAt",code,class_code AS "classCode" FROM physics_profiles WHERE student=?')
   const progress = db.prepare('SELECT question,response,checked FROM physics_progress WHERE student=?')
-  const write = db.prepare('INSERT INTO physics_progress VALUES(?,?,?,?) ON CONFLICT(student,question) DO UPDATE SET response=excluded.response,checked=excluded.checked')
-  const copyProgress=db.prepare('INSERT OR IGNORE INTO physics_progress(student,question,response,checked) VALUES(?,?,?,?)')
-  function studentProgress(student){
-    const rows=progress.all(student)
+  const write = db.prepare('INSERT INTO physics_progress(student,question,response,checked) VALUES(?,?,?,?) ON CONFLICT(student,question) DO UPDATE SET response=excluded.response,checked=excluded.checked')
+  const copyProgress=db.prepare('INSERT INTO physics_progress(student,question,response,checked) VALUES(?,?,?,?) ON CONFLICT(student,question) DO NOTHING')
+  async function studentProgress(student){
+    const rows=await progress.all(student)
     const ids=new Set(rows.map(r=>r.question))
     for(const r of rows.slice()){
       const replacement=movedWithoutEdits.get(r.question)
       if(!replacement || ids.has(replacement))continue
-      copyProgress.run(student,replacement,r.response,r.checked)
+      await copyProgress.run(student,replacement,r.response,r.checked)
       rows.push({...r,question:replacement})
     }
     return rows.map(r=>({...r,lo:retired.has(r.question)?null:question(r.question)?.lo_id}))
   }
-  const getMock = db.prepare('SELECT * FROM physics_mocks WHERE student=? ORDER BY rowid DESC LIMIT 1')
-  function mockView(row) {
+  const getMock = db.prepare(`SELECT * FROM physics_mocks WHERE student=? ORDER BY ${db.seq} DESC LIMIT 1`)
+  async function mockView(row) {
     if (!row) return null
     if (!row.done && Date.now() >= row.deadline) {
-      db.prepare('UPDATE physics_mocks SET done=1 WHERE id=?').run(row.id)
+      await db.prepare('UPDATE physics_mocks SET done=1 WHERE id=?').run(row.id)
       row.done=1
-      platform.logMock(row.student,row)
+      await platform.logMock(row.student,row)
     }
     const answers=JSON.parse(row.answers)
     return { id:row.id,grade:row.grade,title:row.title||null,testId:row.test_id||null,answers,deadline:row.deadline,done:Boolean(row.done),
       questions:JSON.parse(row.ids).map(id=>{const q=question(id);return {...prompt(q,false),...(row.done ? {review:solution(q,answers[id])} : {})}}) }
   }
-  function createMock(student,gradeNumber,ids,title=null,testId=null){
+  async function createMock(student,gradeNumber,ids,title=null,testId=null){
     const minutes=ids.reduce((n,id)=>n+(bank.prepare('SELECT estimated_minutes m FROM questions WHERE id=?').get(id)?.m||2),0)
-    const id=randomUUID()
-    db.prepare('INSERT INTO physics_mocks(id,student,grade,ids,answers,deadline,done,test_id,title) VALUES(?,?,?,?,?,?,0,?,?)').run(id,student,gradeNumber,JSON.stringify(ids),'{}',Date.now()+60000*minutes,testId,title)
-    return mockView(getMock.get(student))
+    await db.prepare('INSERT INTO physics_mocks(id,student,grade,ids,answers,deadline,done,test_id,title) VALUES(?,?,?,?,?,?,0,?,?)').run(randomUUID(),student,gradeNumber,JSON.stringify(ids),'{}',Date.now()+60000*minutes,testId,title)
+    return mockView(await getMock.get(student))
   }
-  const platform=platformApi(db,{bank,cards,question,prompt,solution,validAnswer,studentProgress,mockView,getMock,createMock,isActive:student=>Boolean(activeVisit.get(student,Date.now())&&profile.get(student)?.school),profile,write,readBank:file=>readFileSync(new URL('./bank/'+file,import.meta.url))})
+  const isActive=async student=>Boolean(await activeVisit.get(student,Date.now()) && (await profile.get(student))?.school)
+  const platform=platformApi(db,{bank,cards,question,prompt,solution,validAnswer,studentProgress,mockView,getMock,createMock,isActive,profile,write,readBank:file=>readFileSync(new URL('./bank/'+file,import.meta.url))})
   return async function(path,req,res,student,reply,readBody,session={}) {
-    if (path === '/api/catalog' && req.method==='GET') return reply(200,{cards,profile:activeVisit.get(student, Date.now()) ? profile.get(student) : null})
+    await platform.ready
+    if (path === '/api/catalog' && req.method==='GET') return reply(200,{cards,profile:await activeVisit.get(student, Date.now()) ? await profile.get(student) : null})
     let body={}
     if (req.method==='POST') {
       try {body=await readBody(req); if (!body || typeof body!=='object') throw Error()} catch {return reply(400,{error:'طلب غير صالح'})}
@@ -149,32 +135,32 @@ export function physicsApi(db) {
       const school=typeof body.school==='string' ? body.school.trim() : ''
       const classCode=typeof body.classCode==='string' ? body.classCode.trim().toUpperCase() : ''
       if(name.length<2 || name.length>80 || school.length<2 || school.length>120)return reply(400,{error:'تحقق من اسم الطالب والمدرسة'})
-      const existing=db.prepare('SELECT code FROM physics_profiles WHERE student=?').get(student)
-      if(classCode && !db.prepare('SELECT 1 FROM physics_classes WHERE code=?').get(classCode))return reply(400,{error:'رمز الصف غير صحيح'})
-      db.prepare('INSERT INTO physics_profiles(student,name,started,school) VALUES(?,?,?,?) ON CONFLICT(student) DO UPDATE SET name=excluded.name,school=excluded.school').run(student,name,new Date().toISOString(),school)
-      if(classCode)db.prepare('UPDATE physics_profiles SET class_code=? WHERE student=?').run(classCode,student)
+      const existing=await db.prepare('SELECT code FROM physics_profiles WHERE student=?').get(student)
+      if(classCode && !await db.prepare('SELECT 1 AS x FROM physics_classes WHERE code=?').get(classCode))return reply(400,{error:'رمز الصف غير صحيح'})
+      await db.prepare('INSERT INTO physics_profiles(student,name,started,school) VALUES(?,?,?,?) ON CONFLICT(student) DO UPDATE SET name=excluded.name,school=excluded.school').run(student,name,new Date().toISOString(),school)
+      if(classCode)await db.prepare('UPDATE physics_profiles SET class_code=? WHERE student=?').run(classCode,student)
       if(!existing?.code){
         let code
-        do code=String(100000+Math.floor(Math.random()*900000)); while(db.prepare('SELECT 1 FROM physics_profiles WHERE code=?').get(code))
-        db.prepare('UPDATE physics_profiles SET code=? WHERE student=?').run(code,student)
+        do code=String(100000+Math.floor(Math.random()*900000)); while(await db.prepare('SELECT 1 AS x FROM physics_profiles WHERE code=?').get(code))
+        await db.prepare('UPDATE physics_profiles SET code=? WHERE student=?').run(code,student)
       }
-      db.prepare('INSERT OR REPLACE INTO physics_visits VALUES(?,?)').run(student,Date.now()+86400000)
-      return reply(200,profile.get(student))
+      await db.prepare('INSERT INTO physics_visits(student,expires) VALUES(?,?) ON CONFLICT(student) DO UPDATE SET expires=excluded.expires').run(student,Date.now()+86400000)
+      return reply(200,await profile.get(student))
     }
     await platform(path,req,res,student,reply,body,session)
     if(res.headersSent)return
-    if(!activeVisit.get(student, Date.now()) || !profile.get(student)?.school) return reply(403,{error:'انتهت جلسة التدريب. حدّث الصفحة وسجّل الدخول للمتابعة.'})
+    if(!await isActive(student)) return reply(403,{error:'انتهت جلسة التدريب. حدّث الصفحة وسجّل الدخول للمتابعة.'})
     if(req.method==='GET'){
-      if(path==='/api/progress') return reply(200,studentProgress(student))
-      if(path==='/api/mock') return reply(200,mockView(getMock.get(student)))
+      if(path==='/api/progress') return reply(200,await studentProgress(student))
+      if(path==='/api/mock') return reply(200,await mockView(await getMock.get(student)))
       if(path.startsWith('/api/card/')){
         return reply(200,practiceOrder(cardQuestions.all(path.slice(10)).map(r=>JSON.parse(r.data_json))).map(q=>prompt(q)))
       }
       if(path.startsWith('/api/figure/')){
         const [, , ,id,role,index]=path.split('/')
         const q=question(id)
-        const mock=getMock.get(student)
-        const reviewed=role==='solution' && (db.prepare('SELECT checked FROM physics_progress WHERE student=? AND question=?').get(student,id)?.checked || studyView.get(student,id) || (mock?.done && JSON.parse(mock.ids).includes(id)))
+        const mock=await getMock.get(student)
+        const reviewed=role==='solution' && ((await db.prepare('SELECT checked FROM physics_progress WHERE student=? AND question=?').get(student,id))?.checked || await studyView.get(student,id) || (mock?.done && JSON.parse(mock.ids).includes(id)))
         const asset=q && (role==='question'||reviewed) && pictures(q,role)[Number(index)]
         if(!asset)return reply(404,{error:'الصورة غير متاحة'})
         const file=imageById.get(asset).path
@@ -183,41 +169,41 @@ export function physicsApi(db) {
       }
     }
     if(req.method==='POST' && path==='/api/mock/new' && [9,10,11,12].includes(body.grade)){
-      const previous=mockView(getMock.get(student))
+      const previous=await mockView(await getMock.get(student))
       if(previous && !previous.done) return reply(409,{error:'أكمل الاختبار الحالي أولاً'})
       const pick=bank.prepare(`SELECT id,estimated_minutes FROM questions WHERE lo_id=? AND kind=? ORDER BY random() LIMIT 1`)
       const rows=cards.filter(c=>c.grade===body.grade).map(c=>pick.get(c.id,c.examType))
       const deadline=Date.now()+60000*rows.reduce((n,r)=>n+r.estimated_minutes,0)
-      db.prepare('INSERT INTO physics_mocks(id,student,grade,ids,answers,deadline,done) VALUES(?,?,?,?,?,?,0)').run(randomUUID(),student,body.grade,JSON.stringify(rows.map(r=>r.id)),'{}',deadline)
-      return reply(201,mockView(getMock.get(student)))
+      await db.prepare('INSERT INTO physics_mocks(id,student,grade,ids,answers,deadline,done) VALUES(?,?,?,?,?,?,0)').run(randomUUID(),student,body.grade,JSON.stringify(rows.map(r=>r.id)),'{}',deadline)
+      return reply(201,await mockView(await getMock.get(student)))
     }
     if(req.method==='POST' && ['/api/mock/answer','/api/mock/finish'].includes(path)){
-      const row=getMock.get(student)
+      const row=await getMock.get(student)
       if(!row || row.id!==body.mock)return reply(409,{error:'تحقق من جلسة الاختبار'})
-      if(!mockView(row).done){
-        if(path.endsWith('finish')){db.prepare('UPDATE physics_mocks SET done=1 WHERE id=?').run(row.id);platform.logMock(student,getMock.get(student))}
+      if(!(await mockView(row)).done){
+        if(path.endsWith('finish')){await db.prepare('UPDATE physics_mocks SET done=1 WHERE id=?').run(row.id);await platform.logMock(student,await getMock.get(student))}
         else {
           if(!JSON.parse(row.ids).includes(body.id)||!validAnswer(question(body.id),body.response))return reply(400,{error:'إجابة غير صالحة'})
           const a=JSON.parse(row.answers);a[body.id]=body.response
-          db.prepare('UPDATE physics_mocks SET answers=? WHERE id=?').run(JSON.stringify(a),row.id)
+          await db.prepare('UPDATE physics_mocks SET answers=? WHERE id=?').run(JSON.stringify(a),row.id)
         }
       }
-      return reply(200,mockView(getMock.get(student)))
+      return reply(200,await mockView(await getMock.get(student)))
     }
     if(path==='/api/walkthrough' && req.method==='POST'){
       const q=typeof body.id==='string' && question(body.id)
       if(!q)return reply(404,{error:'غير متاح'})
-      db.prepare('INSERT OR IGNORE INTO physics_study_views VALUES(?,?)').run(student,q.id)
-      return reply(200,platform.withTeacher(student,q.id,solution(q,'')))
+      await db.prepare('INSERT INTO physics_study_views(student,question) VALUES(?,?) ON CONFLICT(student,question) DO NOTHING').run(student,q.id)
+      return reply(200,await platform.withTeacher(student,q.id,solution(q,'')))
     }
     if(path==='/api/record' && req.method==='POST'){
       const q=typeof body.id==='string' && question(body.id)
       if(!q || !validAnswer(q,body.response) || (body.check && !body.response.trim()))return reply(400,{error:'أدخل إجابتك أولاً'})
-      write.run(student,q.id,body.response,body.check?1:0)
+      await write.run(student,q.id,body.response,body.check?1:0)
       if(!body.check)return reply(200,{saved:true})
       const result=solution(q,body.response)
-      platform.logAttempt(student,q,body.response,result)
-      return reply(200,platform.withTeacher(student,q.id,result))
+      await platform.logAttempt(student,q,body.response,result)
+      return reply(200,await platform.withTeacher(student,q.id,result))
     }
     return reply(404,{error:'غير متاح'})
   }

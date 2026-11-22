@@ -34,10 +34,17 @@ async function start() {
 function renderTabs(counts = {}) {
   $('tabs').replaceChildren(...TABS.map(([id, label]) => { const b = btn(label, () => go(id)); b.setAttribute('aria-pressed', id === tab); if (counts[id]) b.append(el('em', 'count', String(counts[id]))); return b }))
 }
+// every navigation renders into its own fresh container, so a slow response from the tab the teacher just left
+// lands in a detached node instead of drawing over the tab they opened
+let navigation = 0
 async function go(id, ...args) {
+  const mine = ++navigation
   tab = TABS.some(x => x[0] === id) ? id : 'overview'; location.hash = tab
-  const o = await api('overview'); renderTabs({ notebooks: o.pendingNotebooks, inbox: o.unreadQuestions })
-  const view = $('view'); view.replaceChildren(el('p', 'muted', 'جارٍ التحميل…'))
+  renderTabs()
+  const o = await api('overview')
+  if (mine !== navigation) return
+  renderTabs({ notebooks: o.pendingNotebooks, inbox: o.unreadQuestions })
+  const view = el('div'); view.append(el('p', 'muted', 'جارٍ التحميل…')); $('view').replaceChildren(view)
   await ({ overview, students, classesView, tests, notebooks, inbox, rubrics })[{ classes: 'classesView' }[tab] || tab](view, o, ...args)
 }
 $('adminLogin').onsubmit = async e => {

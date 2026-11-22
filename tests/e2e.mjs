@@ -115,7 +115,8 @@ await step('student sees feedback and starts the assigned test', async () => {
 })
 await step('the blueprint mock exam still starts and finishes', async () => {
   await sp.click('#check')   // finish the assigned test first
-  await sp.waitForSelector('#title'); await sp.click('#back'); await sp.waitForSelector('#mockStart')
+  await sp.waitForFunction(() => /Mock review|مراجعة/.test(document.getElementById('title')?.textContent || ''))
+  await sp.click('#back'); await sp.waitForSelector('#mockStart')
   await sp.click('#gradeTabs button:nth-child(1)'); await sp.click('#mockStart')
   await sp.waitForFunction(() => document.querySelectorAll('#nav button').length === 20)
   await sp.click('#check'); await sp.waitForFunction(() => /Mock review|مراجعة/.test(document.getElementById('title').textContent))

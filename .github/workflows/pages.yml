@@ -47,7 +47,7 @@ jobs:
           node-version: 24
       - run: npm run build:pages
         env:
-          PHYSICS_API_ORIGIN: ${{ vars.PHYSICS_API_ORIGIN || 'https://physics-api-production.up.railway.app' }}
+          PHYSICS_API_ORIGIN: ${{ vars.PHYSICS_API_ORIGIN || 'https://haykal100.vercel.app' }}
       - uses: actions/checkout@v4
         with:
           ref: gh-pages
@@ -70,7 +70,7 @@ jobs:
       - name: Check published page, calculator and database API
         env:
           SITE: https://kamelbshara.github.io/EOT-physics-2025-2026-
-          API: ${{ vars.PHYSICS_API_ORIGIN || 'https://physics-api-production.up.railway.app' }}
+          API: ${{ vars.PHYSICS_API_ORIGIN || 'https://haykal100.vercel.app' }}
         run: |
           for attempt in {1..30}; do
             curl -fsSL "$SITE/?v=$GITHUB_SHA" -o /tmp/physics-index && grep -Fq 'id="outcomesLink"' /tmp/physics-index && break
@@ -121,7 +121,7 @@ jobs:
           enablement: true
       - run: npm run build:pages
         env:
-          PHYSICS_API_ORIGIN: ${{ vars.PHYSICS_API_ORIGIN || 'https://physics-api-production.up.railway.app' }}
+          PHYSICS_API_ORIGIN: ${{ vars.PHYSICS_API_ORIGIN || 'https://haykal100.vercel.app' }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist/pages
