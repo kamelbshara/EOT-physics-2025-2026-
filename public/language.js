@@ -35,4 +35,8 @@ const errors={
  'تحقق من جلسة الاختبار':'Reopen the current mock exam.', 'إجابة غير صالحة':'Invalid answer.',
  'أدخل إجابتك أولاً':'Enter your answer first.', 'غير متاح':'Unavailable.'
 }
-export const errorText = message => t(errors[message]||message,message)
+// A browser that cannot reach the server reports "Failed to fetch" (Chrome), "Load failed" (Safari) or "NetworkError…" (Firefox).
+const offline=/Failed to fetch|Load failed|NetworkError|Network request failed/i
+export const errorText = message => offline.test(message||'')
+ ? t('Cannot reach the server right now. Check your connection and try again in a minute.','تعذّر الوصول إلى الخادم الآن. تحقق من اتصالك وأعد المحاولة بعد دقيقة.')
+ : t(errors[message]||message,message)
