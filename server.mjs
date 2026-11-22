@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url'
 import { scheduleBackups } from './lib/backup.mjs'
 
 const data = new URL('./data/', import.meta.url)
-// Neon Postgres when DATABASE_URL is set (shared with the maths platform, every table prefixed physics_);
+// Neon Postgres when DATABASE_URL is set (database physics, every table prefixed physics_);
 // otherwise a local SQLite file for development and tests
 const onNeon = Boolean(process.env.DATABASE_URL)
 if (!onNeon && !process.env.PHYSICS_DB && !process.env.VERCEL) mkdirSync(data, { recursive: true })
