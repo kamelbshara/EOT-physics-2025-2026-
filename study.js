@@ -199,7 +199,7 @@ async function openCard(card){
 function dashboard(){
  items=[];$('studyTabs').hidden=false;$('panelManual').disabled=$('examplesTab').disabled=false;opened++;inMock=false;$('lesson').hidden=true;$('dashboard').hidden=false;$('notice').textContent=''
  document.body.dataset.grade=grade
- $('gradeTabs').replaceChildren(...[9,10,11,12].map(n=>{const b=button(t('Grade ','الصف ')+n,()=>{grade=n;dashboard()});b.setAttribute('aria-pressed',n===grade);return b}))
+ $('gradeTabs').replaceChildren(...[9,10,11,12].map(n=>{const b=button(t(n+' Advanced',n+' متقدم'),()=>{grade=n;dashboard()});b.setAttribute('aria-pressed',n===grade);return b}))
  $('outcomesLink').hash='grade-'+grade
  const group=cards.filter(c=>c.grade===grade)
  const total=group.reduce((n,c)=>n+c.total,0),reviewed=Object.values(cache).filter(v=>v.checked&&group.some(c=>c.id===v.lo)).length
