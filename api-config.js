@@ -1,1 +1,1 @@
-export const apiOrigin = "https://physics-api-production.up.railway.app"
+export const apiOrigin = "https://haykal100.vercel.app"
