@@ -6,6 +6,9 @@ const $ = id => document.getElementById(id)
 function el(tag, cls, text) { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined && text !== null) n.textContent = text; return n }
 function btn(label, onclick, cls = '') { const b = el('button', cls, label); b.type = 'button'; b.onclick = async e => { try { await onclick(e) } catch (err) { toast(err.message, true) } }; return b }
 async function api(path, body) {
+  try { return await request(path, body) } catch (e) { if (/Failed to fetch|Load failed|NetworkError/i.test(e.message)) throw Error('تعذّر الوصول إلى الخادم الآن. تحقق من الاتصال أو من حالة الخادم على Railway.'); throw e }
+}
+async function request(path, body) {
   const res = await fetch(apiOrigin + '/api/admin/' + path, { credentials: 'include', ...(body === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }) })
   if (res.status === 401 && path !== 'login') { showLogin(); throw Error('سجّل الدخول مجددًا') }
   if (!res.ok) throw Error((await res.json().catch(() => ({}))).error || 'تعذّر الاتصال')
