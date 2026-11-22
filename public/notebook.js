@@ -41,6 +41,22 @@ function bookFigure(asset,page,caption,notation){
  return figure
 }
 
+// each law on its own line; x_f / v_i are written with real subscripts as in the textbook
+function formulaLines(text){
+ const box=el('div')
+ box.className='formula'
+ for(const line of String(text).split(/\s+·\s+/)){
+  const row=document.createElement('span')
+  row.className='formula-line'
+  for(const part of line.split(/(_[a-z0-9]+)/i)){
+   if(/^_[a-z0-9]+$/i.test(part)){const sub=document.createElement('sub');sub.textContent=part.slice(1);row.append(sub)}
+   else if(part)row.append(document.createTextNode(part))
+  }
+  box.append(row)
+ }
+ return box
+}
+
 export function makeLawCard(row){
  const id=laws.indexOf(row)
  const card=el('article')
@@ -56,9 +72,8 @@ export function makeLawCard(row){
    card.append(bookFigure(asset,page,t(en,ar),notation))
   }
  }else{
-  const equation=el('p',row[4])
-  equation.className='formula'
-  card.append(diagram(id),equation)
+  if(plateCaptions[id])card.append(diagram(id))   // newer laws have no drawn plate yet
+  card.append(formulaLines(row[4]))
  }
  card.append(el('p',t(row[5],row[6])))
  return card

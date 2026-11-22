@@ -130,6 +130,23 @@ await step('student signs in on a phone with code and name', async () => {
   expect(await p.evaluate(() => document.documentElement.scrollWidth) <= 390, 'no horizontal scroll on phone')
   await phone.close()
 })
+await step('reset clears answers but keeps mastery', async () => {
+  const before = await sp.evaluate(() => fetch('/api/insights', { credentials: 'include' }).then(r => r.json()))
+  expect((await sp.evaluate(() => fetch('/api/progress', { credentials: 'include' }).then(r => r.json()))).length > 0, 'answers exist before reset')
+  await sp.goto(BASE + '/'); await sp.waitForSelector('.hub-action')
+  await sp.click('.hub-action:has-text("Reset")')
+  await sp.waitForFunction(() => fetch('/api/progress', { credentials: 'include' }).then(r => r.json()).then(l => l.length === 0))
+  const after = await sp.evaluate(() => fetch('/api/insights', { credentials: 'include' }).then(r => r.json()))
+  expect(JSON.stringify(after.mastery) === JSON.stringify(before.mastery), 'mastery kept after reset')
+  await sp.reload(); await sp.waitForSelector('.hub-map')
+  expect(await sp.evaluate(() => !Object.keys(JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k => /^physics-practice-[^-]*$|^physics-practice-\d/.test(k) && !k.endsWith('-mock') && !k.endsWith('-answers')) || '{}'))).length), 'device copy cleared')
+})
+await step('law sheet shows one law per line', async () => {
+  await sp.click('#lawsTab'); await sp.selectOption('#lawGrade', '9'); await sp.waitForSelector('#lawCards .formula-line')
+  expect(await sp.locator('#lawCards .law-card').nth(4).locator('.formula-line').count() === 4, 'constant acceleration has 4 lines')
+  if (process.env.E2E_SHOTS) await sp.locator('#lawCards .law-card').nth(4).screenshot({ path: process.env.E2E_SHOTS + '/law.png' })
+  await sp.click('#lawsTab')
+})
 await step('teacher exports students as CSV', async () => {
   const csv = await (await tp.request.get(BASE + '/api/admin/export/students.csv')).text()
   expect(csv.includes('Test Student'), 'student in CSV')

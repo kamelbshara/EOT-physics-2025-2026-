@@ -59,10 +59,20 @@ async function init(){
  sessionStorage.setItem('physics-profile',JSON.stringify(profile))
  key='physics-practice-'+profile.startedAt
  try{cache=JSON.parse(localStorage.getItem(key)||'{}')}catch{cache={}}
+ // the server is the record: keep only answers not sent yet (a reset on another device clears the rest)
+ cache=Object.fromEntries(Object.entries(cache).filter(([,d])=>d?.pending))
  await schedule()
  for(const r of await api('progress'))cache[r.question]={response:r.response,checked:Boolean(r.checked),lo:r.lo}
  persist();mock=await api('mock');await syncMock();mock=await api('mock');dashboard()
  await openLinkedCard()
+}
+// Reset: every question appears unsolved again so the student can redo them; mastery, streak, points and badges stay
+async function resetPractice(){
+ if(!confirm(t('Start the questions again? Your answers will be cleared so every question looks unsolved. Your mastery, streak, points and badges stay.','هل تريد البدء من جديد؟ ستُمسح إجاباتك وتظهر كل الأسئلة غير محلولة لتحلها من الأول. يبقى تقدمك في الإتقان والسلسلة والنقاط والأوسمة.')))return
+ await schedule()
+ await api('reset',{})
+ cache={};replies={};persist()
+ dashboard()
 }
 async function openLinkedCard(){
  if(!profile?.school)return
@@ -218,7 +228,7 @@ function dashboard(){
    const foot=element('small',t(done+' of '+c.total+' reviewed','تمت مراجعة '+done+' من '+c.total));foot.className='kpi-foot'
    b.append(head,element('h3',c[lang()]),bar,foot);return b
  }))
- void renderHub($('hub'),{api,grade,cards,onPracticeList:(list,title)=>openList(list,title),onMock:m=>{mock=m;openMock()},openCard:c=>{grade=c.grade;void guard(openCard)(c)},openNotebookList:guard(()=>openNotebookList({api})),openAsk:guard(()=>openAsk({api}))})
+ void renderHub($('hub'),{api,grade,cards,onPracticeList:(list,title)=>openList(list,title),reset:guard(resetPractice),onMock:m=>{mock=m;openMock()},openCard:c=>{grade=c.grade;void guard(openCard)(c)},openNotebookList:guard(()=>openNotebookList({api})),openAsk:guard(()=>openAsk({api}))})
  $('resumeMock').hidden=!mock;$('resumeMock').textContent=mock?.done?t('Review latest mock','مراجعة آخر اختبار'):mock?.title?t('Resume · ','متابعة · ')+splitTitle(mock.title):t('Resume Grade ','متابعة اختبار الصف ')+mock?.grade
 }
 function openMock(){inMock=true;items=mock.questions;current=null;index=0;lesson()}

@@ -44,7 +44,8 @@ export async function renderHub(host, ctx) {
     action('⚡', t('Custom test', 'اختبار مخصص'), 0, () => testBuilder(ctx)),
     action('📋', t('My tests', 'اختباراتي'), info.tests, () => myTests(ctx), info.tests ? 'accent' : ''),
     action('✎', t('My notebook', 'دفتري'), info.reviewed, () => ctx.openNotebookList(), info.reviewed ? 'accent' : ''),
-    action('✉', t('Ask the teacher', 'اسأل المعلم'), info.unread, () => ctx.openAsk(), info.unread ? 'accent' : ''))
+    action('✉', t('Ask the teacher', 'اسأل المعلم'), info.unread, () => ctx.openAsk(), info.unread ? 'accent' : ''),
+    action('⟲', t('Reset', 'إعادة ضبط'), 0, () => ctx.reset()))
 
   // mastery map for the selected grade
   const map = el('section', 'hub-map')

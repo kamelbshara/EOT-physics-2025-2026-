@@ -89,7 +89,7 @@ export async function handleRequest(request, response) {
     }
     const teacher = request.headers.cookie?.match(/(?:^|; *)physics_teacher=([a-f0-9]{64})(?:;|$)/)?.[1] || null
     const session = { teacher, setCookie, assignStudent: id => setCookie('physics_student', id, 31536000) }
-    if (/^\/api\/(catalog|profile|progress|card|figure|record|walkthrough|mock|login|logout|notebook|tests|insights|ask|admin|leaderboard|hints)(?:\/|$)/.test(path)) {
+    if (/^\/api\/(catalog|profile|progress|card|figure|record|walkthrough|mock|login|logout|notebook|tests|insights|ask|admin|leaderboard|hints|reset)(?:\/|$)/.test(path)) {
       return await physics(path,request,response,student,reply,jsonBody,session)
     }
     return reply(404, { error: 'غير متاح' })
